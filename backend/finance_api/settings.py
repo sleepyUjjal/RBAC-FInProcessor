@@ -87,14 +87,11 @@ WSGI_APPLICATION = 'finance_api.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'mysql.connector.django',
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': os.environ.get('DB_NAME'),
         'USER': os.environ.get('DB_USER'),
         'PASSWORD': os.environ.get('DB_PASSWORD'),
         'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'OPTIONS': {
-            'use_pure': True,
-        }
     }
 }
 
@@ -171,7 +168,7 @@ SIMPLE_JWT = {
 # 5. Swagger (drf-spectacular) Settings
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'FinSecure Suite API',
+    'TITLE': 'RBAC-FinProcessor API',
     'DESCRIPTION': 'Backend processing and access control for Finance Project',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
