@@ -30,6 +30,9 @@ urlpatterns = [
     # Records Endpoints
     path('api/records/', include('records.urls')),
     
+    # Dashboard Endpoints
+    path('api/dashboard/', include('dashboard.urls')),
+    
     # Swagger UI
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
