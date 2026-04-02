@@ -1,7 +1,7 @@
 from rest_framework import viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import FinancialRecord, AuditLog
-from .serializers import FinancialRecordSerializer
+from .serializers import FinancialRecordSerializer, AuditLogSerializer
 from accounts.permissions import IsAdminUser, IsAnalystUser, IsViewerUser
 
 class FinancialRecordViewSet(viewsets.ModelViewSet):
@@ -16,16 +16,13 @@ class FinancialRecordViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         # RBAC Logic
         if self.action in ['list', 'retrieve']:
-            permission_classes = [IsAdminUser | IsAnalystUser | IsViewerUser]
-        elif self.action in ['create', 'update', 'partial_update']:
             permission_classes = [IsAdminUser | IsAnalystUser]
-        elif self.action == 'destroy':
-            permission_classes = [IsAdminUser]
+        elif self.action in ['create', 'update', 'partial_update', 'destroy']:
+            permission_classes = [IsAdminUser] 
         else:
             permission_classes = [IsAdminUser]
-            
         return [permission() for permission in permission_classes]
-
+    
     def perform_create(self, serializer):
         # Automatically set the created_by field to the current user when creating a new record
         serializer.save(created_by=self.request.user)
@@ -50,3 +47,11 @@ class FinancialRecordViewSet(viewsets.ModelViewSet):
             details=f"Deleted record #{instance.id} - {instance.type} of {instance.amount}"
         )
         instance.delete()
+
+class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = AuditLog.objects.all().order_by('-timestamp')
+    serializer_class = AuditLogSerializer
+    permission_classes = [IsAdminUser] # Strictly Admin only
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['action', 'user']
+    search_fields = ['details']
