@@ -1,6 +1,6 @@
 from rest_framework import viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import FinancialRecord
+from .models import FinancialRecord, AuditLog
 from .serializers import FinancialRecordSerializer
 from accounts.permissions import IsAdminUser, IsAnalystUser, IsViewerUser
 
@@ -29,3 +29,24 @@ class FinancialRecordViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Automatically set the created_by field to the current user when creating a new record
         serializer.save(created_by=self.request.user)
+
+    def perform_create(self, serializer):
+        instance = serializer.save(created_by=self.request.user)
+        AuditLog.objects.create(
+            user=self.request.user, action='CREATE',
+            details=f"Created record #{instance.id} - {instance.type} of {instance.amount}"
+        )
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        AuditLog.objects.create(
+            user=self.request.user, action='UPDATE',
+            details=f"Updated record #{instance.id} - {instance.type} of {instance.amount}"
+        )
+
+    def perform_destroy(self, instance):
+        AuditLog.objects.create(
+            user=self.request.user, action='DELETE',
+            details=f"Deleted record #{instance.id} - {instance.type} of {instance.amount}"
+        )
+        instance.delete()
