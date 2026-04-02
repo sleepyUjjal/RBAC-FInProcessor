@@ -39,3 +39,20 @@ class FinancialRecord(models.Model):
     def __str__(self):
         cat_name = self.custom_category if self.category == 'Other' else self.category
         return f"{self.type} - {self.amount} ({cat_name})"
+
+
+class AuditLog(models.Model):
+    ACTION_CHOICES = (
+        ('CREATE', 'Create'),
+        ('UPDATE', 'Update'),
+        ('DELETE', 'Delete'),
+    )
+    
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    action = models.CharField(max_length=10, choices=ACTION_CHOICES)
+    module = models.CharField(max_length=50, default='Financial Record')
+    details = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.action} on {self.timestamp}"

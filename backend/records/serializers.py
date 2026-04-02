@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import FinancialRecord
+from .models import FinancialRecord, AuditLog
+
 
 class FinancialRecordSerializer(serializers.ModelSerializer):
     created_by_email = serializers.EmailField(source='created_by.email', read_only=True)
@@ -25,3 +26,11 @@ class FinancialRecordSerializer(serializers.ModelSerializer):
             data['custom_category'] = None
 
         return data
+
+
+class AuditLogSerializer(serializers.ModelSerializer):
+    user_email = serializers.EmailField(source='user.email', read_only=True)
+
+    class Meta:
+        model = AuditLog
+        fields = '__all__'
