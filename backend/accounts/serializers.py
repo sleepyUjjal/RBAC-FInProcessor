@@ -37,3 +37,9 @@ class RegisterSerializer(serializers.ModelSerializer):
             role=role
         )
         return user
+    
+class UserManagementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'first_name', 'last_name', 'role', 'is_active', 'date_joined')
+        read_only_fields = ('id', 'email', 'first_name', 'last_name', 'date_joined')

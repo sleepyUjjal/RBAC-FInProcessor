@@ -1,14 +1,18 @@
 from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework import generics, status
+from rest_framework import generics, status, serializers, viewsets, filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.conf import settings
-from .serializers import RegisterSerializer, UserSerializer
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
-# For Swagger Documentation
+
+# Swagger Documentation
 from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import serializers
+
+# Custom imports
+from .serializers import RegisterSerializer, UserSerializer, UserManagementSerializer
+from .permissions import IsAdminUser
 
 User = get_user_model()
 
@@ -65,3 +69,14 @@ class UserProfileView(generics.RetrieveAPIView):
     @extend_schema(description="Get current logged-in user details using the Authorization Token.")
     def get_object(self):
         return self.request.user
+
+# Admin API to manage users (Change roles, Block/Unblock)
+class UserManagementViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all().order_by('-date_joined')
+    serializer_class = UserManagementSerializer
+    permission_classes = [IsAdminUser]
+    
+    # Filters for easy user management in admin panel
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['role', 'is_active']
+    search_fields = ['email', 'first_name', 'last_name']
