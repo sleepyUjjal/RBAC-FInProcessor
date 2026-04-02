@@ -20,8 +20,15 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from django.urls import include
 
 urlpatterns = [
+
+    # Admin Panel
     path('admin/', admin.site.urls),
+
+    # Authentication Endpoints
     path('api/auth/', include('accounts.urls')),
+
+    # Records Endpoints
+    path('api/records/', include('records.urls')),
     
     # Swagger UI
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
