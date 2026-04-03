@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound";
 import RecordsList from "./pages/RecordsList";
 import Register from "./pages/Register";
 import Unauthorized from "./pages/Unauthorized";
+import UserDetail from "./pages/UserDetail";
 import UserList from "./pages/UserList";
 import "./index.css";
 
@@ -31,6 +32,8 @@ function App() {
 
               <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
                 <Route element={<UserList />} path="/users" />
+                <Route element={<UserDetail />} path="/users/new" />
+                <Route element={<UserDetail />} path="/users/:userId" />
                 <Route element={<AuditLogs />} path="/logs" />
               </Route>
 

@@ -13,7 +13,10 @@ export const listUsers = (params = {}, options = {}) =>
     signal: options.signal,
   });
 
-export const getUserById = (id) => apiClient.get(`${USERS_BASE}${id}/`);
+export const getUserById = (id, options = {}) =>
+  apiClient.get(`${USERS_BASE}${id}/`, {
+    signal: options.signal,
+  });
 
 export const createUser = (payload) =>
   apiClient.post(USERS_BASE, {

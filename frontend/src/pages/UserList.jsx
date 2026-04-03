@@ -1,4 +1,5 @@
 import { useDeferredValue, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { deleteUser, listUsers } from "../api/users";
 import DataTable from "../components/DataTable";
 import FeedbackToast from "../components/FeedbackToast";
@@ -55,6 +56,7 @@ const parsePaginatedResponse = (response, currentPage) => {
 };
 
 const UserList = () => {
+  const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchInput, setSearchInput] = useState("");
@@ -174,15 +176,6 @@ const UserList = () => {
     }
   };
 
-  const triggerEditInfo = (user) => {
-    setToast({
-      isVisible: true,
-      title: "Edit Coming Next",
-      message: `User detail form for ${user.email} will be added in Step 9.`,
-      type: "info",
-    });
-  };
-
   const columns = [
     {
       key: "email",
@@ -221,7 +214,7 @@ const UserList = () => {
         <div className="flex gap-2">
           <button
             className="btn-secondary px-2 py-1 text-xs"
-            onClick={() => triggerEditInfo(row)}
+            onClick={() => navigate(`/users/${row.id}`)}
             type="button"
           >
             Edit
@@ -241,10 +234,13 @@ const UserList = () => {
   return (
     <section className="glass-panel mx-auto max-w-5xl p-8">
       <div className="mb-4">
-        <h2 className="mb-2 text-3xl">User Management</h2>
-        <p className="text-sm">
-          Admin-only directory with search, filters, pagination, and delete workflow.
-        </p>
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-3xl">User Management</h2>
+          <button className="btn-primary px-4 py-2 text-sm" onClick={() => navigate("/users/new")} type="button">
+            Add User
+          </button>
+        </div>
+        <p className="text-sm">Admin-only directory with search, filters, pagination, and delete workflow.</p>
       </div>
 
       <div className="mb-4 grid gap-3 md:grid-cols-4">
