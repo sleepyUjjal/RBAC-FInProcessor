@@ -38,12 +38,12 @@ function App() {
                 <Route element={<AuditLogs />} path="/logs" />
               </Route>
 
-              <Route element={<ProtectedRoute allowedRoles={["admin", "analyst"]} />}>
+              <Route element={<ProtectedRoute allowedRoles={["admin", "analyst", "user"]} />}>
                 <Route element={<RecordsList />} path="/records" />
                 <Route element={<RecordDetail />} path="/records/:recordId" />
               </Route>
 
-              <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+              <Route element={<ProtectedRoute allowedRoles={["admin", "user"]} />}>
                 <Route element={<RecordDetail />} path="/records/new" />
               </Route>
             </Route>

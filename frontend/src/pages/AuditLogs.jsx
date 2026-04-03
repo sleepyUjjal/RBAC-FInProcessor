@@ -11,8 +11,8 @@ const ACTION_OPTIONS = [
 ];
 
 const actionBadgeClass = {
-  CREATE: "bg-emerald-100 text-emerald-700",
-  UPDATE: "bg-amber-100 text-amber-800",
+  CREATE: "bg-[rgba(54,80,63,0.14)] text-[rgba(44,70,54,1)]",
+  UPDATE: "bg-[rgba(183,137,63,0.16)] text-[rgba(99,69,29,1)]",
   DELETE: "bg-[rgba(125,47,47,0.14)] text-[rgba(95,35,35,1)]",
 };
 

@@ -1,5 +1,5 @@
 const trendStyles = {
-  up: "bg-emerald-100 text-emerald-800",
+  up: "bg-[rgba(54,80,63,0.14)] text-[rgba(44,70,54,1)]",
   down: "bg-[rgba(125,47,47,0.14)] text-[rgba(95,35,35,1)]",
   neutral: "bg-[var(--surface-muted)] text-[var(--text-h)]",
 };

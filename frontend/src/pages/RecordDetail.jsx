@@ -64,7 +64,10 @@ const RecordDetail = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const isAdmin = user?.role === "admin";
+  const role = user?.role || "";
+  const isAdmin = role === "admin";
+  const isUser = role === "user";
+  const currentUserEmail = (user?.email || "").trim().toLowerCase();
   const isCreateMode = !recordId;
 
   const [form, setForm] = useState(DEFAULT_FORM);
@@ -72,6 +75,7 @@ const RecordDetail = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [updateMode, setUpdateMode] = useState("patch");
+  const [recordOwnerEmail, setRecordOwnerEmail] = useState("");
   const [toast, setToast] = useState({
     isVisible: false,
     title: "",
@@ -85,6 +89,7 @@ const RecordDetail = () => {
     if (isCreateMode) {
       setLoading(false);
       setForm(DEFAULT_FORM);
+      setRecordOwnerEmail("");
       return;
     }
 
@@ -108,6 +113,7 @@ const RecordDetail = () => {
           description: response?.description ?? "",
           date: response?.date ?? "",
         });
+        setRecordOwnerEmail((response?.created_by_email || "").trim().toLowerCase());
       } catch (requestError) {
         if (!isMounted || requestError?.name === "AbortError") {
           return;
@@ -127,6 +133,10 @@ const RecordDetail = () => {
       controller.abort();
     };
   }, [isCreateMode, recordId]);
+
+  const canCreateRecord = isAdmin || isUser;
+  const canUpdateRecord = isAdmin || (isUser && (!recordOwnerEmail || recordOwnerEmail === currentUserEmail));
+  const canSubmit = isCreateMode ? canCreateRecord : canUpdateRecord;
 
   const closeToast = () => {
     setToast((current) => ({ ...current, isVisible: false }));
@@ -168,11 +178,13 @@ const RecordDetail = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!isAdmin) {
+    if (!canSubmit) {
       setToast({
         isVisible: true,
         title: "Read-only Access",
-        message: "Only Admin can create or update records.",
+        message: isCreateMode
+          ? "Only Admin or User can create records."
+          : "You can update only your own records.",
         type: "warning",
       });
       return;
@@ -243,14 +255,16 @@ const RecordDetail = () => {
         </Link>
       </div>
 
-      {!isAdmin ? (
+      {!canSubmit ? (
         <div className="alert-warning mb-4 p-3 text-sm">
-          You have read-only access. Only Admin can create, update, or delete records.
+          {isCreateMode
+            ? "You have read-only access. Only Admin or User can create records."
+            : "You have read-only access for this record."}
         </div>
       ) : null}
 
       {loading ? (
-        <div className="rounded-md border border-[var(--border)] bg-white p-4 text-sm">
+        <div className="rounded-md border border-[var(--border)] bg-[var(--surface-strong)] p-4 text-sm">
           Loading record details...
         </div>
       ) : (
@@ -258,6 +272,7 @@ const RecordDetail = () => {
           <div>
             <label className="mb-1 block text-sm">Amount</label>
             <input
+              disabled={saving || !canSubmit}
               min="0"
               name="amount"
               onChange={handleChange}
@@ -270,12 +285,19 @@ const RecordDetail = () => {
 
           <div>
             <label className="mb-1 block text-sm">Date</label>
-            <input name="date" onChange={handleChange} required type="date" value={form.date} />
+            <input
+              disabled={saving || !canSubmit}
+              name="date"
+              onChange={handleChange}
+              required
+              type="date"
+              value={form.date}
+            />
           </div>
 
           <div>
             <label className="mb-1 block text-sm">Type</label>
-            <select name="type" onChange={handleChange} value={form.type}>
+            <select disabled={saving || !canSubmit} name="type" onChange={handleChange} value={form.type}>
               {TYPE_OPTIONS.map((type) => (
                 <option key={type} value={type}>
                   {type}
@@ -286,7 +308,7 @@ const RecordDetail = () => {
 
           <div>
             <label className="mb-1 block text-sm">Category</label>
-            <select name="category" onChange={handleChange} value={form.category}>
+            <select disabled={saving || !canSubmit} name="category" onChange={handleChange} value={form.category}>
               {CATEGORY_OPTIONS.map((category) => (
                 <option key={category} value={category}>
                   {category}
@@ -299,6 +321,7 @@ const RecordDetail = () => {
             <div className="md:col-span-2">
               <label className="mb-1 block text-sm">Custom Category (required for Other)</label>
               <input
+                disabled={saving || !canSubmit}
                 name="custom_category"
                 onChange={handleChange}
                 required
@@ -311,6 +334,7 @@ const RecordDetail = () => {
           <div className="md:col-span-2">
             <label className="mb-1 block text-sm">Description</label>
             <textarea
+              disabled={saving || !canSubmit}
               name="description"
               onChange={handleChange}
               placeholder="Optional notes"
@@ -322,7 +346,11 @@ const RecordDetail = () => {
           {!isCreateMode ? (
             <div className="md:col-span-2">
               <label className="mb-1 block text-sm">Update Method</label>
-              <select onChange={(event) => setUpdateMode(event.target.value)} value={updateMode}>
+              <select
+                disabled={saving || !canSubmit}
+                onChange={(event) => setUpdateMode(event.target.value)}
+                value={updateMode}
+              >
                 <option value="patch">PATCH (partial update)</option>
                 <option value="put">PUT (full update)</option>
               </select>
@@ -338,7 +366,7 @@ const RecordDetail = () => {
           <div className="md:col-span-2 flex items-center gap-3">
             <button
               className="btn-primary px-5 py-2.5"
-              disabled={saving || !isAdmin}
+              disabled={saving || !canSubmit}
               type="submit"
             >
               {saving ? "Saving..." : actionLabel}

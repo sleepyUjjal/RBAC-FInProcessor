@@ -205,7 +205,7 @@ const UserDetail = () => {
       </div>
 
       {loading ? (
-        <div className="rounded-md border border-[var(--border)] bg-white p-4 text-sm">
+        <div className="rounded-md border border-[var(--border)] bg-[var(--surface-strong)] p-4 text-sm">
           Loading user details...
         </div>
       ) : (

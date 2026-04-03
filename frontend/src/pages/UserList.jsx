@@ -201,7 +201,7 @@ const UserList = () => {
         <span
           className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
             row.isActive
-              ? "bg-emerald-100 text-emerald-700"
+              ? "bg-[rgba(54,80,63,0.14)] text-[rgba(44,70,54,1)]"
               : "bg-[var(--surface-muted)] text-[var(--text-h)]"
           }`}
         >

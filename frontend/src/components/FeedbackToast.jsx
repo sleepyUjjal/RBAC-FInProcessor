@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 const toastStyles = {
-  success: "border-emerald-300 bg-emerald-50 text-emerald-800",
+  success: "border-[rgba(54,80,63,0.3)] bg-[rgba(54,80,63,0.12)] text-[rgba(44,70,54,1)]",
   error: "border-[rgba(125,47,47,0.34)] bg-[rgba(125,47,47,0.08)] text-[rgba(95,35,35,1)]",
   warning: "border-[rgba(143,104,44,0.34)] bg-[rgba(183,137,63,0.12)] text-[rgba(108,75,29,1)]",
   info: "border-[var(--border)] bg-[var(--surface-strong)] text-[var(--text-h)]",

@@ -8,7 +8,7 @@ const Sidebar = () => {
   const navItems = [
     { to: "/dashboard", label: "Dashboard", show: true },
     { to: "/users", label: "Users", show: role === "admin" },
-    { to: "/records", label: "Records", show: role === "admin" || role === "analyst" },
+    { to: "/records", label: "Records", show: role === "admin" || role === "analyst" || role === "user" },
     { to: "/logs", label: "Audit Logs", show: role === "admin" },
   ];
 

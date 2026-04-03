@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { deleteRecord, listRecords } from "../api/records";
 import DataTable from "../components/DataTable";
@@ -74,7 +74,11 @@ const parsePaginatedResponse = (response, currentPage) => {
 const RecordsList = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const isAdmin = user?.role === "admin";
+  const role = user?.role || "";
+  const currentUserEmail = (user?.email || "").trim().toLowerCase();
+  const canCreateRecords = role === "admin" || role === "user";
+  const canManageAnyRecord = role === "admin";
+  const canManageOwnRecord = role === "user";
 
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -161,8 +165,25 @@ const RecordsList = () => {
     setSelectedRecord(null);
   };
 
+  const canManageRecord = (row) => {
+    if (canManageAnyRecord) {
+      return true;
+    }
+    if (!canManageOwnRecord) {
+      return false;
+    }
+
+    const ownerEmail = (row?.created_by_email || "").trim().toLowerCase();
+    if (!ownerEmail) {
+      return true;
+    }
+    return ownerEmail === currentUserEmail;
+  };
+
+  const canDeleteRecordRow = (row) => canManageRecord(row);
+
   const confirmDelete = async () => {
-    if (!selectedRecord || !isAdmin) {
+    if (!selectedRecord || !canDeleteRecordRow(selectedRecord)) {
       setSelectedRecord(null);
       return;
     }
@@ -194,87 +215,85 @@ const RecordsList = () => {
     }
   };
 
-  const columns = useMemo(() => {
-    const baseColumns = [
-      {
-        key: "id",
-        header: "ID",
-      },
-      {
-        key: "date",
-        header: "Date",
-      },
-      {
-        key: "type",
-        header: "Type",
-        render: (row) => (
-          <span className="inline-flex rounded-full bg-[var(--surface-muted)] px-2 py-1 text-xs font-medium">
-            {row.type}
-          </span>
-        ),
-      },
-      {
-        key: "category",
-        header: "Category",
-        render: (row) => row.category === "Other" ? row.custom_category || "Other" : row.category,
-      },
-      {
-        key: "amount",
-        header: "Amount",
-        render: (row) => <strong>{formatCurrency(row.amount)}</strong>,
-      },
-      {
-        key: "created_by_email",
-        header: "Created By",
-        render: (row) => row.created_by_email || "-",
-      },
-    ];
-
-    const actionColumn = {
-      key: "actions",
-      header: "Actions",
+  const baseColumns = [
+    {
+      key: "id",
+      header: "ID",
+    },
+    {
+      key: "date",
+      header: "Date",
+    },
+    {
+      key: "type",
+      header: "Type",
       render: (row) => (
-        <div className="flex gap-2">
-          {isAdmin ? (
-            <button
-              className="btn-secondary px-2 py-1 text-xs"
-              onClick={() => navigate(`/records/${row.id}`)}
-              type="button"
-            >
-              Edit
-            </button>
-          ) : (
-            <button
-              className="btn-secondary px-2 py-1 text-xs"
-              onClick={() => navigate(`/records/${row.id}`)}
-              type="button"
-            >
-              View
-            </button>
-          )}
-
-          {isAdmin ? (
-            <button
-              className="rounded-md bg-[var(--burgundy)] px-2 py-1 text-xs font-medium text-white hover:opacity-90"
-              onClick={() => setSelectedRecord(row)}
-              type="button"
-            >
-              Delete
-            </button>
-          ) : null}
-        </div>
+        <span className="inline-flex rounded-full bg-[var(--surface-muted)] px-2 py-1 text-xs font-medium">
+          {row.type}
+        </span>
       ),
-    };
+    },
+    {
+      key: "category",
+      header: "Category",
+      render: (row) => row.category === "Other" ? row.custom_category || "Other" : row.category,
+    },
+    {
+      key: "amount",
+      header: "Amount",
+      render: (row) => <strong>{formatCurrency(row.amount)}</strong>,
+    },
+    {
+      key: "created_by_email",
+      header: "Created By",
+      render: (row) => row.created_by_email || "-",
+    },
+  ];
 
-    return [...baseColumns, actionColumn];
-  }, [isAdmin, navigate]);
+  const actionColumn = {
+    key: "actions",
+    header: "Actions",
+    render: (row) => (
+      <div className="flex gap-2">
+        {canManageRecord(row) ? (
+          <button
+            className="btn-secondary px-2 py-1 text-xs"
+            onClick={() => navigate(`/records/${row.id}`)}
+            type="button"
+          >
+            Edit
+          </button>
+        ) : (
+          <button
+            className="btn-secondary px-2 py-1 text-xs"
+            onClick={() => navigate(`/records/${row.id}`)}
+            type="button"
+          >
+            View
+          </button>
+        )}
+
+        {canDeleteRecordRow(row) ? (
+          <button
+            className="rounded-md bg-[var(--burgundy)] px-2 py-1 text-xs font-medium text-white hover:opacity-90"
+            onClick={() => setSelectedRecord(row)}
+            type="button"
+          >
+            Delete
+          </button>
+        ) : null}
+      </div>
+    ),
+  };
+
+  const columns = [...baseColumns, actionColumn];
 
   return (
     <section className="glass-panel mx-auto max-w-6xl p-8 md:p-10 fade-in-up">
       <div className="mb-4">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-3xl">Records</h2>
-          {isAdmin ? (
+          {canCreateRecords ? (
             <button className="btn-primary px-4 py-2 text-sm" onClick={() => navigate("/records/new")} type="button">
               Add Record
             </button>
