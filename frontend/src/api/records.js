@@ -38,7 +38,7 @@ export const patchRecord = (id, payload) =>
 
 export const deleteRecord = (id) => apiClient.delete(`${RECORDS_BASE}${id}/`);
 
-export const listAuditLogs = (params = {}) =>
+export const listAuditLogs = (params = {}, options = {}) =>
   apiClient.get(LOGS_BASE, {
     query: {
       page: params.page,
@@ -46,4 +46,5 @@ export const listAuditLogs = (params = {}) =>
       action: params.action,
       user: params.user,
     },
+    signal: options.signal,
   });
