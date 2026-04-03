@@ -47,6 +47,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 class LogoutView(APIView):
     @extend_schema(
         description="Logout user and clear HttpOnly refresh token cookie.",
+        request=None,
         responses={
             200: inline_serializer(
                 name='LogoutResponse',

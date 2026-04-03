@@ -2,15 +2,36 @@ from django.utils import timezone
 from datetime import timedelta
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import serializers
 from django.db.models import Sum, DecimalField, Value
 from django.db.models.functions import Coalesce
 
 # Swagger Documentation ke liye imports
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
 from drf_spectacular.types import OpenApiTypes
 
 from records.models import FinancialRecord
 from accounts.permissions import IsAdminUser, IsAnalystUser, IsViewerUser
+
+DashboardTypeSummarySerializer = inline_serializer(
+    name='DashboardTypeSummary',
+    fields={
+        'total': serializers.DecimalField(max_digits=15, decimal_places=2),
+        'period': serializers.CharField(),
+        'categories': serializers.ListField(child=serializers.DictField()),
+    },
+)
+
+DashboardSummaryResponseSerializer = inline_serializer(
+    name='DashboardSummaryResponse',
+    fields={
+        'net_balance': serializers.DecimalField(max_digits=15, decimal_places=2),
+        'income': DashboardTypeSummarySerializer,
+        'expense': DashboardTypeSummarySerializer,
+        'investment': DashboardTypeSummarySerializer,
+        'server_time': serializers.DateTimeField(),
+    },
+)
 
 class DashboardSummaryView(APIView):
     permission_classes = [IsAdminUser | IsAnalystUser | IsViewerUser]
@@ -63,6 +84,8 @@ class DashboardSummaryView(APIView):
     # Swagger (drf-spectacular) Configuration
     # ==========================================
     @extend_schema(
+        request=None,
+        responses={200: DashboardSummaryResponseSerializer},
         parameters=[
             OpenApiParameter(
                 name='income_range', 
