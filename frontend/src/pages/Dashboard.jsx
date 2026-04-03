@@ -1,4 +1,5 @@
 import { useAuth } from "../context/useAuth";
+import StatsCard from "../components/StatsCard";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -12,18 +13,27 @@ const Dashboard = () => {
       </p>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <article className="rounded-lg border border-[var(--border)] bg-white p-4">
-          <h3 className="mb-2 text-xl">Net Balance</h3>
-          <p className="text-sm">Placeholder card for summary API data.</p>
-        </article>
-        <article className="rounded-lg border border-[var(--border)] bg-white p-4">
-          <h3 className="mb-2 text-xl">Income</h3>
-          <p className="text-sm">Range-based income metrics will appear here.</p>
-        </article>
-        <article className="rounded-lg border border-[var(--border)] bg-white p-4">
-          <h3 className="mb-2 text-xl">Expense</h3>
-          <p className="text-sm">Range-based expense metrics will appear here.</p>
-        </article>
+        <StatsCard
+          subtitle="Placeholder card for summary API data."
+          title="Net Balance"
+          trend="+12.4%"
+          trendDirection="up"
+          value="₹0.00"
+        />
+        <StatsCard
+          subtitle="Range-based income metrics will appear here."
+          title="Income"
+          trend="+8.1%"
+          trendDirection="up"
+          value="₹0.00"
+        />
+        <StatsCard
+          subtitle="Range-based expense metrics will appear here."
+          title="Expense"
+          trend="-2.7%"
+          trendDirection="down"
+          value="₹0.00"
+        />
       </div>
     </section>
   );
