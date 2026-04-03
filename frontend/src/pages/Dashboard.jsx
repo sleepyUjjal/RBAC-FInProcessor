@@ -1,42 +1,32 @@
-import { Link } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 
 const Dashboard = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   return (
-    <div className="min-h-screen p-6 md:p-10">
-      <div className="glass-panel mx-auto max-w-5xl p-8">
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h2 className="mb-2 text-3xl">Dashboard</h2>
-            <p className="text-sm">
-              Signed in as <strong>{user?.email}</strong> ({user?.rawRole || "User"})
-            </p>
-          </div>
-          <button className="btn-secondary" onClick={logout} type="button">
-            Logout
-          </button>
-        </div>
+    <section className="glass-panel mx-auto max-w-5xl p-8">
+      <h2 className="mb-2 text-3xl">Dashboard</h2>
+      <p className="mb-8 text-sm">
+        Welcome back, <strong>{user?.name || user?.email}</strong>. Dashboard API integration
+        comes in Step 7.
+      </p>
 
-        <div className="grid gap-3 md:grid-cols-4">
-          <Link className="btn-secondary text-center" to="/dashboard">
-            Dashboard
-          </Link>
-          <Link className="btn-secondary text-center" to="/users">
-            Users
-          </Link>
-          <Link className="btn-secondary text-center" to="/records">
-            Records
-          </Link>
-          <Link className="btn-secondary text-center" to="/logs">
-            Audit Logs
-          </Link>
-        </div>
+      <div className="grid gap-4 md:grid-cols-3">
+        <article className="rounded-lg border border-[var(--border)] bg-white p-4">
+          <h3 className="mb-2 text-xl">Net Balance</h3>
+          <p className="text-sm">Placeholder card for summary API data.</p>
+        </article>
+        <article className="rounded-lg border border-[var(--border)] bg-white p-4">
+          <h3 className="mb-2 text-xl">Income</h3>
+          <p className="text-sm">Range-based income metrics will appear here.</p>
+        </article>
+        <article className="rounded-lg border border-[var(--border)] bg-white p-4">
+          <h3 className="mb-2 text-xl">Expense</h3>
+          <p className="text-sm">Range-based expense metrics will appear here.</p>
+        </article>
       </div>
-    </div>
+    </section>
   );
 };
 
 export default Dashboard;
-

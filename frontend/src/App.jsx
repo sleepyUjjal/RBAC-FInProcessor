@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import AppLayout from "./components/AppLayout";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AuditLogs from "./pages/AuditLogs";
@@ -25,16 +26,18 @@ function App() {
           <Route element={<Unauthorized />} path="/unauthorized" />
 
           <Route element={<ProtectedRoute />}>
-            <Route element={<Dashboard />} path="/dashboard" />
-          </Route>
+            <Route element={<AppLayout />}>
+              <Route element={<Dashboard />} path="/dashboard" />
 
-          <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-            <Route element={<UserList />} path="/users" />
-            <Route element={<AuditLogs />} path="/logs" />
-          </Route>
+              <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+                <Route element={<UserList />} path="/users" />
+                <Route element={<AuditLogs />} path="/logs" />
+              </Route>
 
-          <Route element={<ProtectedRoute allowedRoles={["admin", "analyst"]} />}>
-            <Route element={<RecordsList />} path="/records" />
+              <Route element={<ProtectedRoute allowedRoles={["admin", "analyst"]} />}>
+                <Route element={<RecordsList />} path="/records" />
+              </Route>
+            </Route>
           </Route>
 
           <Route element={<NotFound />} path="*" />
