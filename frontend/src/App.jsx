@@ -1,14 +1,45 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext.jsx";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AuditLogs from "./pages/AuditLogs";
+import Dashboard from "./pages/Dashboard";
+import LandingPage from "./pages/LandingPage";
+import Login from "./pages/Login";
+import NotFound from "./pages/NotFound";
+import RecordsList from "./pages/RecordsList";
+import Register from "./pages/Register";
+import Unauthorized from "./pages/Unauthorized";
+import UserList from "./pages/UserList";
 import "./index.css";
 
 function App() {
   return (
     <AuthProvider>
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <h1 className="text-gradient">RBAC-FInProcessor</h1>
-      </div>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<LandingPage />} path="/" />
+          <Route element={<Login />} path="/login" />
+          <Route element={<Register />} path="/register" />
+          <Route element={<Unauthorized />} path="/unauthorized" />
+
+          <Route element={<ProtectedRoute />}>
+            <Route element={<Dashboard />} path="/dashboard" />
+          </Route>
+
+          <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+            <Route element={<UserList />} path="/users" />
+            <Route element={<AuditLogs />} path="/logs" />
+          </Route>
+
+          <Route element={<ProtectedRoute allowedRoles={["admin", "analyst"]} />}>
+            <Route element={<RecordsList />} path="/records" />
+          </Route>
+
+          <Route element={<NotFound />} path="*" />
+        </Routes>
+      </BrowserRouter>
     </AuthProvider>
   );
 }
