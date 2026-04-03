@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import RecordDetail from "./pages/RecordDetail";
 import RecordsList from "./pages/RecordsList";
 import Register from "./pages/Register";
 import Unauthorized from "./pages/Unauthorized";
@@ -39,6 +40,11 @@ function App() {
 
               <Route element={<ProtectedRoute allowedRoles={["admin", "analyst"]} />}>
                 <Route element={<RecordsList />} path="/records" />
+                <Route element={<RecordDetail />} path="/records/:recordId" />
+              </Route>
+
+              <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+                <Route element={<RecordDetail />} path="/records/new" />
               </Route>
             </Route>
           </Route>

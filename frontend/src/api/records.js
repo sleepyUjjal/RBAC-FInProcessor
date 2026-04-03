@@ -3,7 +3,7 @@ import { apiClient } from "./client";
 const RECORDS_BASE = "/api/records/data/";
 const LOGS_BASE = "/api/records/logs/";
 
-export const listRecords = (params = {}) =>
+export const listRecords = (params = {}, options = {}) =>
   apiClient.get(RECORDS_BASE, {
     query: {
       page: params.page,
@@ -13,9 +13,13 @@ export const listRecords = (params = {}) =>
       date: params.date,
       ordering: params.ordering,
     },
+    signal: options.signal,
   });
 
-export const getRecordById = (id) => apiClient.get(`${RECORDS_BASE}${id}/`);
+export const getRecordById = (id, options = {}) =>
+  apiClient.get(`${RECORDS_BASE}${id}/`, {
+    signal: options.signal,
+  });
 
 export const createRecord = (payload) =>
   apiClient.post(RECORDS_BASE, {
@@ -43,4 +47,3 @@ export const listAuditLogs = (params = {}) =>
       user: params.user,
     },
   });
-
