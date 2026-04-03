@@ -1,8 +1,20 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 
 const LandingPage = () => {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <p className="text-lg">Checking session...</p>
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return <Navigate replace to="/dashboard" />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-6 text-center">
@@ -12,33 +24,16 @@ const LandingPage = () => {
         Records, and Audit Logs.
       </p>
 
-      {isAuthenticated ? (
-        <div className="flex flex-col items-center gap-3">
-          <p className="text-sm md:text-base">
-            Logged in as <strong>{user?.name || user?.email}</strong> ({user?.rawRole || "User"})
-          </p>
-          <div className="flex items-center gap-3">
-            <Link to="/dashboard" className="btn-primary">
-              Go to Dashboard
-            </Link>
-            <button className="btn-secondary" onClick={logout} type="button">
-              Logout
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="flex items-center gap-3">
-          <Link to="/login" className="btn-primary">
-            Login
-          </Link>
-          <Link to="/register" className="btn-secondary">
-            Register
-          </Link>
-        </div>
-      )}
+      <div className="flex items-center gap-3">
+        <Link to="/login" className="btn-primary">
+          Login
+        </Link>
+        <Link to="/register" className="btn-secondary">
+          Register
+        </Link>
+      </div>
     </div>
   );
 };
 
 export default LandingPage;
-
