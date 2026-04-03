@@ -2,7 +2,8 @@ from django.utils import timezone
 from datetime import timedelta
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.db.models import Sum
+# Naye imports add kiye: DecimalField aur Value
+from django.db.models import Sum, DecimalField, Value
 from django.db.models.functions import Coalesce
 
 # Swagger Documentation ke liye imports
@@ -41,7 +42,14 @@ class DashboardSummaryView(APIView):
             else:
                 queryset = queryset.filter(date__gte=threshold.date())
 
-        total = queryset.aggregate(total=Coalesce(Sum('amount'), 0.0))['total']
+        # YAHAN FIX KIYA HAI: Float (0.0) ki jagah explicit DecimalField use kiya
+        total = queryset.aggregate(
+            total=Coalesce(
+                Sum('amount'), 
+                Value(0, output_field=DecimalField()), 
+                output_field=DecimalField()
+            )
+        )['total']
         
         categories = queryset.values('category').annotate(
             amount=Sum('amount')

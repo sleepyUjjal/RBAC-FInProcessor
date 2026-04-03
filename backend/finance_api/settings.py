@@ -152,10 +152,25 @@ CORS_ALLOW_CREDENTIALS = True # Cookies cross-origin
 
 # 3. Django REST Framework (DRF) Setup
 REST_FRAMEWORK = {
+    # Global authentication using JWT
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
+    # Global pagination settings
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+
+    # Rate limiting (100 req/day for anonymous, 1000 req/day for authenticated users)
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/day',
+        'user': '1000/day'
+    }
 }
 
 # 4. SimpleJWT Settings

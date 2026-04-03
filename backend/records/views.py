@@ -23,10 +23,7 @@ class FinancialRecordViewSet(viewsets.ModelViewSet):
             permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
     
-    def perform_create(self, serializer):
-        # Automatically set the created_by field to the current user when creating a new record
-        serializer.save(created_by=self.request.user)
-
+    # Duplicate hata kar sirf ye wala rakha
     def perform_create(self, serializer):
         instance = serializer.save(created_by=self.request.user)
         AuditLog.objects.create(
