@@ -1,32 +1,70 @@
-import { useState } from "react";
+import { useDeferredValue, useEffect, useState } from "react";
+import { deleteUser, listUsers } from "../api/users";
 import DataTable from "../components/DataTable";
 import FeedbackToast from "../components/FeedbackToast";
 import Modal from "../components/Modal";
 
+const PAGE_SIZE = 20;
+
+const ROLE_OPTIONS = [
+  { value: "", label: "All Roles" },
+  { value: "Admin", label: "Admin" },
+  { value: "Analyst", label: "Analyst" },
+  { value: "Viewer", label: "Viewer" },
+  { value: "User", label: "User" },
+];
+
+const STATUS_OPTIONS = [
+  { value: "", label: "All Status" },
+  { value: "true", label: "Active" },
+  { value: "false", label: "Inactive" },
+];
+
+const normalizeUser = (user) => {
+  const firstName = user.first_name ?? user.firstName ?? "";
+  const lastName = user.last_name ?? user.lastName ?? "";
+  const fullName = `${firstName} ${lastName}`.trim();
+  return {
+    ...user,
+    fullName: fullName || "-",
+    role: user.role || "User",
+    isActive: Boolean(user.is_active ?? user.isActive),
+  };
+};
+
+const parsePaginatedResponse = (response, currentPage) => {
+  if (Array.isArray(response)) {
+    return {
+      results: response.map(normalizeUser),
+      count: response.length,
+      totalPages: 1,
+      currentPage: 1,
+    };
+  }
+
+  const results = Array.isArray(response?.results) ? response.results.map(normalizeUser) : [];
+  const count = Number(response?.count ?? results.length);
+  const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE));
+
+  return {
+    results,
+    count,
+    totalPages,
+    currentPage,
+  };
+};
+
 const UserList = () => {
-  const [rows, setRows] = useState([
-    {
-      id: 1,
-      email: "admin@finance.local",
-      fullName: "System Admin",
-      role: "Admin",
-      isActive: true,
-    },
-    {
-      id: 2,
-      email: "analyst@finance.local",
-      fullName: "Primary Analyst",
-      role: "Analyst",
-      isActive: true,
-    },
-    {
-      id: 3,
-      email: "viewer@finance.local",
-      fullName: "Audit Viewer",
-      role: "Viewer",
-      isActive: false,
-    },
-  ]);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchInput, setSearchInput] = useState("");
+  const deferredSearch = useDeferredValue(searchInput.trim());
+  const [roleFilter, setRoleFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [reloadCounter, setReloadCounter] = useState(0);
   const [selectedUser, setSelectedUser] = useState(null);
   const [toast, setToast] = useState({
     isVisible: false,
@@ -34,6 +72,62 @@ const UserList = () => {
     title: "",
     type: "info",
   });
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    setPage(1);
+  }, [deferredSearch, roleFilter, statusFilter]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
+    const fetchUsers = async () => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const response = await listUsers(
+          {
+            page,
+            search: deferredSearch,
+            role: roleFilter || undefined,
+            isActive: statusFilter || undefined,
+          },
+          { signal: controller.signal }
+        );
+        if (!isMounted) {
+          return;
+        }
+
+        const parsed = parsePaginatedResponse(response, page);
+        setRows(parsed.results);
+        setTotalCount(parsed.count);
+        setTotalPages(parsed.totalPages);
+
+        if (page > parsed.totalPages) {
+          setPage(parsed.totalPages);
+        }
+      } catch (requestError) {
+        if (!isMounted || requestError?.name === "AbortError") {
+          return;
+        }
+        setRows([]);
+        setError(requestError?.message || "Unable to fetch users right now.");
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchUsers();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, [deferredSearch, page, reloadCounter, roleFilter, statusFilter]);
 
   const closeToast = () => {
     setToast((current) => ({ ...current, isVisible: false }));
@@ -47,19 +141,46 @@ const UserList = () => {
     setSelectedUser(null);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!selectedUser) {
       return;
     }
 
-    setRows((currentRows) => currentRows.filter((row) => row.id !== selectedUser.id));
+    try {
+      await deleteUser(selectedUser.id);
+
+      setToast({
+        isVisible: true,
+        title: "User Deleted",
+        message: `${selectedUser.email} was removed successfully.`,
+        type: "success",
+      });
+
+      const shouldMoveToPreviousPage = rows.length === 1 && page > 1;
+      if (shouldMoveToPreviousPage) {
+        setPage((current) => Math.max(1, current - 1));
+      } else {
+        setReloadCounter((current) => current + 1);
+      }
+    } catch (requestError) {
+      setToast({
+        isVisible: true,
+        title: "Delete Failed",
+        message: requestError?.message || "Unable to delete this user.",
+        type: "error",
+      });
+    } finally {
+      setSelectedUser(null);
+    }
+  };
+
+  const triggerEditInfo = (user) => {
     setToast({
       isVisible: true,
-      title: "User Removed",
-      message: `${selectedUser.email} has been deleted from the table.`,
-      type: "success",
+      title: "Edit Coming Next",
+      message: `User detail form for ${user.email} will be added in Step 9.`,
+      type: "info",
     });
-    setSelectedUser(null);
   };
 
   const columns = [
@@ -98,7 +219,11 @@ const UserList = () => {
       header: "Actions",
       render: (row) => (
         <div className="flex gap-2">
-          <button className="btn-secondary px-2 py-1 text-xs" type="button">
+          <button
+            className="btn-secondary px-2 py-1 text-xs"
+            onClick={() => triggerEditInfo(row)}
+            type="button"
+          >
             Edit
           </button>
           <button
@@ -117,13 +242,76 @@ const UserList = () => {
     <section className="glass-panel mx-auto max-w-5xl p-8">
       <div className="mb-4">
         <h2 className="mb-2 text-3xl">User Management</h2>
-        <p className="text-sm">Reusable table, modal, and toast are now ready for API wiring in Step 8.</p>
+        <p className="text-sm">
+          Admin-only directory with search, filters, pagination, and delete workflow.
+        </p>
       </div>
 
-      <DataTable columns={columns} rows={rows} />
+      <div className="mb-4 grid gap-3 md:grid-cols-4">
+        <div className="md:col-span-2">
+          <label className="mb-1 block text-sm">Search</label>
+          <input
+            onChange={(event) => setSearchInput(event.target.value)}
+            placeholder="Search by email or name"
+            type="text"
+            value={searchInput}
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm">Role</label>
+          <select onChange={(event) => setRoleFilter(event.target.value)} value={roleFilter}>
+            {ROLE_OPTIONS.map((option) => (
+              <option key={option.value || "all-roles"} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="mb-1 block text-sm">Status</label>
+          <select onChange={(event) => setStatusFilter(event.target.value)} value={statusFilter}>
+            {STATUS_OPTIONS.map((option) => (
+              <option key={option.value || "all-status"} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 text-sm">
+        <p>
+          Showing <strong>{rows.length}</strong> of <strong>{totalCount}</strong> users
+        </p>
+        <button
+          className="btn-secondary px-3 py-2 text-sm"
+          onClick={() => setReloadCounter((current) => current + 1)}
+          type="button"
+        >
+          Refresh List
+        </button>
+      </div>
+
+      {error ? (
+        <div className="mb-4 rounded-md border border-rose-300 bg-rose-50 p-3 text-sm text-rose-700">
+          {error}
+        </div>
+      ) : null}
+
+      <DataTable
+        columns={columns}
+        loading={loading}
+        pagination={{
+          currentPage: page,
+          totalPages,
+          onPageChange: setPage,
+        }}
+        rows={rows}
+      />
 
       <Modal
         confirmText="Delete User"
+        disableConfirm={false}
         isDanger
         isOpen={Boolean(selectedUser)}
         onClose={closeDeleteModal}

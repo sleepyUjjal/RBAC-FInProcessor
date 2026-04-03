@@ -2,7 +2,7 @@ import { apiClient } from "./client";
 
 const USERS_BASE = "/api/auth/users/";
 
-export const listUsers = (params = {}) =>
+export const listUsers = (params = {}, options = {}) =>
   apiClient.get(USERS_BASE, {
     query: {
       page: params.page,
@@ -10,6 +10,7 @@ export const listUsers = (params = {}) =>
       role: params.role,
       is_active: params.isActive,
     },
+    signal: options.signal,
   });
 
 export const getUserById = (id) => apiClient.get(`${USERS_BASE}${id}/`);
@@ -30,4 +31,3 @@ export const patchUser = (id, payload) =>
   });
 
 export const deleteUser = (id) => apiClient.delete(`${USERS_BASE}${id}/`);
-
