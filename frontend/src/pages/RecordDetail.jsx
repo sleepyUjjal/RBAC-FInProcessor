@@ -228,7 +228,7 @@ const RecordDetail = () => {
   };
 
   return (
-    <section className="glass-panel mx-auto max-w-3xl p-8">
+    <section className="glass-panel mx-auto max-w-4xl p-8 md:p-10 fade-in-up">
       <div className="mb-6 flex items-center justify-between gap-3">
         <div>
           <h2 className="mb-1 text-3xl">{isCreateMode ? "Create Record" : "Update Record"}</h2>
@@ -244,7 +244,7 @@ const RecordDetail = () => {
       </div>
 
       {!isAdmin ? (
-        <div className="mb-4 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
+        <div className="alert-warning mb-4 p-3 text-sm">
           You have read-only access. Only Admin can create, update, or delete records.
         </div>
       ) : null}
@@ -330,7 +330,7 @@ const RecordDetail = () => {
           ) : null}
 
           {error ? (
-            <div className="md:col-span-2 rounded-md border border-rose-300 bg-rose-50 p-3 text-sm text-rose-700">
+            <div className="alert-error md:col-span-2 p-3 text-sm">
               {error}
             </div>
           ) : null}
@@ -362,4 +362,3 @@ const RecordDetail = () => {
 };
 
 export default RecordDetail;
-

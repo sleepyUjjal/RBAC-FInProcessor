@@ -34,7 +34,7 @@ const formatCurrency = (value) => {
 
 const DashboardCategoryPanel = ({ title, categories = [] }) => {
   return (
-    <article className="rounded-lg border border-[var(--border)] bg-white p-4">
+    <article className="panel-elevated p-4">
       <h3 className="mb-3 text-xl">{title}</h3>
       {categories.length ? (
         <ul className="space-y-2">
@@ -111,7 +111,7 @@ const Dashboard = () => {
   };
 
   return (
-    <section className="glass-panel mx-auto max-w-5xl p-8">
+    <section className="glass-panel mx-auto max-w-6xl p-8 md:p-10 fade-in-up">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="mb-2 text-3xl">Dashboard</h2>
@@ -170,13 +170,13 @@ const Dashboard = () => {
       </div>
 
       {error ? (
-        <div className="mb-6 rounded-md border border-rose-300 bg-rose-50 p-3 text-sm text-rose-700">
+        <div className="alert-error mb-6 p-3 text-sm">
           {error}
         </div>
       ) : null}
 
       {loading ? (
-        <div className="mb-8 rounded-lg border border-[var(--border)] bg-white p-6 text-sm">
+        <div className="panel-elevated mb-8 p-6 text-sm">
           Loading dashboard summary...
         </div>
       ) : null}
@@ -213,7 +213,7 @@ const Dashboard = () => {
           trendDirection="neutral"
           value={formatCurrency(investmentTotal)}
         />
-        <article className="rounded-lg border border-[var(--border)] bg-white p-4">
+        <article className="panel-elevated p-4">
           <h3 className="mb-2 text-xl">Summary</h3>
           <p className="text-sm">
             Income {formatCurrency(incomeTotal)} - Expense {formatCurrency(expenseTotal)} = Net{" "}

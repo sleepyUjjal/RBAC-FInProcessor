@@ -31,17 +31,17 @@ const Modal = ({
   }
 
   const confirmClass = isDanger
-    ? "rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-    : "rounded-md bg-[var(--gold)] px-4 py-2 text-sm font-medium text-white hover:opacity-90";
+    ? "rounded-xl bg-[var(--burgundy)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+    : "rounded-xl bg-gradient-to-r from-[var(--gold)] to-[var(--gold-deep)] px-4 py-2 text-sm font-medium text-white hover:opacity-90";
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(21,15,10,0.48)] p-4 backdrop-blur-[2px]"
       onClick={() => onClose?.()}
       role="presentation"
     >
       <div
-        className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
+        className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--surface-strong)] p-6 shadow-[var(--shadow-lg)]"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
       >
@@ -67,4 +67,3 @@ const Modal = ({
 };
 
 export default Modal;
-

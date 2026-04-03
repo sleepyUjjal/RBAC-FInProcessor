@@ -30,13 +30,14 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="glass-panel w-full max-w-md p-8">
-        <h2 className="mb-4 text-center text-3xl">Login</h2>
-        <p className="mb-6 text-center text-sm">Use your RBAC-FInProcessor account credentials.</p>
+    <div className="min-h-screen flex items-center justify-center p-6 fade-in-up">
+      <div className="glass-panel w-full max-w-md p-8 md:p-10">
+        <p className="text-center text-xs uppercase tracking-[0.18em] text-[var(--text)]">Welcome Back</p>
+        <h2 className="mb-2 mt-3 text-center text-3xl">Login</h2>
+        <p className="mb-7 text-center text-sm">Use your RBAC-FInProcessor account credentials.</p>
 
         {error ? (
-          <div className="mb-4 rounded-md border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
+          <div className="alert-error mb-4 p-3 text-sm">
             {error}
           </div>
         ) : null}
@@ -58,12 +59,12 @@ const Login = () => {
             type="password"
             value={password}
           />
-          <button className="btn-primary" disabled={submitting} type="submit">
+          <button className="btn-primary mt-1" disabled={submitting} type="submit">
             {submitting ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm">
+        <p className="mt-7 text-center text-sm">
           New user?{" "}
           <Link className="text-gradient" to="/register">
             Create account
@@ -75,4 +76,3 @@ const Login = () => {
 };
 
 export default Login;
-

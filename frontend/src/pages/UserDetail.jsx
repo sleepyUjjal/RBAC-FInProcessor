@@ -189,7 +189,7 @@ const UserDetail = () => {
   };
 
   return (
-    <section className="glass-panel mx-auto max-w-3xl p-8">
+    <section className="glass-panel mx-auto max-w-4xl p-8 md:p-10 fade-in-up">
       <div className="mb-6 flex items-center justify-between gap-3">
         <div>
           <h2 className="mb-1 text-3xl">{isCreateMode ? "Create User" : "Update User"}</h2>
@@ -290,7 +290,7 @@ const UserDetail = () => {
           ) : null}
 
           {error ? (
-            <div className="md:col-span-2 rounded-md border border-rose-300 bg-rose-50 p-3 text-sm text-rose-700">
+            <div className="alert-error md:col-span-2 p-3 text-sm">
               {error}
             </div>
           ) : null}
@@ -322,4 +322,3 @@ const UserDetail = () => {
 };
 
 export default UserDetail;
-

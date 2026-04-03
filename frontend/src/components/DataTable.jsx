@@ -10,13 +10,13 @@ const DataTable = ({
   const hasPagination = Boolean(pagination) && pagination.totalPages > 1;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-white">
+    <div className="panel-elevated overflow-hidden">
       <div className="overflow-x-auto">
         <table>
           <thead>
             <tr>
               {columns.map((column) => (
-                <th className="bg-[var(--lavender)]/35" key={column.key}>
+                <th className="bg-[var(--surface-muted)]" key={column.key}>
                   {column.header}
                 </th>
               ))}
@@ -54,7 +54,7 @@ const DataTable = ({
       </div>
 
       {hasPagination ? (
-        <div className="flex items-center justify-between border-t border-[var(--border)] px-4 py-3">
+        <div className="flex items-center justify-between border-t border-[var(--border)] bg-[var(--surface)] px-4 py-3">
           <p className="text-sm">
             Page <strong>{pagination.currentPage}</strong> of <strong>{pagination.totalPages}</strong>
           </p>
@@ -83,4 +83,3 @@ const DataTable = ({
 };
 
 export default DataTable;
-

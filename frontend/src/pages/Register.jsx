@@ -37,13 +37,14 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="glass-panel w-full max-w-lg p-8">
-        <h2 className="mb-4 text-center text-3xl">Create Account</h2>
-        <p className="mb-6 text-center text-sm">Register with allowed roles: User or Viewer.</p>
+    <div className="min-h-screen flex items-center justify-center p-6 fade-in-up">
+      <div className="glass-panel w-full max-w-lg p-8 md:p-10">
+        <p className="text-center text-xs uppercase tracking-[0.18em] text-[var(--text)]">Onboard Securely</p>
+        <h2 className="mb-2 mt-3 text-center text-3xl">Create Account</h2>
+        <p className="mb-7 text-center text-sm">Register with allowed roles: User or Viewer.</p>
 
         {error ? (
-          <div className="mb-4 rounded-md border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-200">
+          <div className="alert-error mb-4 p-3 text-sm">
             {error}
           </div>
         ) : null}
@@ -102,4 +103,3 @@ const Register = () => {
 };
 
 export default Register;
-

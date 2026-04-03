@@ -12,8 +12,8 @@ const ACTION_OPTIONS = [
 
 const actionBadgeClass = {
   CREATE: "bg-emerald-100 text-emerald-700",
-  UPDATE: "bg-blue-100 text-blue-700",
-  DELETE: "bg-rose-100 text-rose-700",
+  UPDATE: "bg-amber-100 text-amber-800",
+  DELETE: "bg-[rgba(125,47,47,0.14)] text-[rgba(95,35,35,1)]",
 };
 
 const parsePaginatedResponse = (response, currentPage) => {
@@ -130,7 +130,7 @@ const AuditLogs = () => {
         key: "action",
         header: "Action",
         render: (row) => {
-          const badgeClass = actionBadgeClass[row.action] || "bg-slate-100 text-slate-700";
+          const badgeClass = actionBadgeClass[row.action] || "bg-[var(--surface-muted)] text-[var(--text-h)]";
           return (
             <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${badgeClass}`}>
               {row.action}
@@ -157,7 +157,7 @@ const AuditLogs = () => {
   );
 
   return (
-    <section className="glass-panel mx-auto max-w-5xl p-8">
+    <section className="glass-panel mx-auto max-w-6xl p-8 md:p-10 fade-in-up">
       <div className="mb-4">
         <h2 className="mb-2 text-3xl">Audit Logs</h2>
         <p className="text-sm">Read-only system activity logs for administrators.</p>
@@ -209,7 +209,7 @@ const AuditLogs = () => {
       </div>
 
       {error ? (
-        <div className="mb-4 rounded-md border border-rose-300 bg-rose-50 p-3 text-sm text-rose-700">
+        <div className="alert-error mb-4 p-3 text-sm">
           {error}
         </div>
       ) : null}

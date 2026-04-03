@@ -189,7 +189,7 @@ const UserList = () => {
       key: "role",
       header: "Role",
       render: (row) => (
-        <span className="inline-flex rounded-full bg-[var(--lavender)] px-2 py-1 text-xs font-medium">
+        <span className="inline-flex rounded-full bg-[var(--surface-muted)] px-2 py-1 text-xs font-medium">
           {row.role}
         </span>
       ),
@@ -200,7 +200,9 @@ const UserList = () => {
       render: (row) => (
         <span
           className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
-            row.isActive ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-700"
+            row.isActive
+              ? "bg-emerald-100 text-emerald-700"
+              : "bg-[var(--surface-muted)] text-[var(--text-h)]"
           }`}
         >
           {row.isActive ? "Active" : "Inactive"}
@@ -220,7 +222,7 @@ const UserList = () => {
             Edit
           </button>
           <button
-            className="rounded-md bg-rose-600 px-2 py-1 text-xs font-medium text-white hover:bg-rose-700"
+            className="rounded-md bg-[var(--burgundy)] px-2 py-1 text-xs font-medium text-white hover:opacity-90"
             onClick={() => openDeleteModal(row)}
             type="button"
           >
@@ -232,7 +234,7 @@ const UserList = () => {
   ];
 
   return (
-    <section className="glass-panel mx-auto max-w-5xl p-8">
+    <section className="glass-panel mx-auto max-w-6xl p-8 md:p-10 fade-in-up">
       <div className="mb-4">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-3xl">User Management</h2>
@@ -289,7 +291,7 @@ const UserList = () => {
       </div>
 
       {error ? (
-        <div className="mb-4 rounded-md border border-rose-300 bg-rose-50 p-3 text-sm text-rose-700">
+        <div className="alert-error mb-4 p-3 text-sm">
           {error}
         </div>
       ) : null}

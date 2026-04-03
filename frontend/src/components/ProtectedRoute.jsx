@@ -7,8 +7,10 @@ const ProtectedRoute = ({ allowedRoles }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <p className="text-lg">Loading your workspace...</p>
+      <div className="min-h-screen flex items-center justify-center p-6 fade-in-up">
+        <div className="glass-panel px-8 py-6">
+          <p className="text-lg">Preparing your workspace...</p>
+        </div>
       </div>
     );
   }
@@ -25,4 +27,3 @@ const ProtectedRoute = ({ allowedRoles }) => {
 };
 
 export default ProtectedRoute;
-
