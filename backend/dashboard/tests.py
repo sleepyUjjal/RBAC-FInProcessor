@@ -2,7 +2,7 @@ from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from records.models import FinancialRecord
-from django.utils import timezone # Date ke liye import kiya
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -12,10 +12,8 @@ class DashboardAPITests(APITestCase):
             email='analyst@dashboard.com', password='testpassword123', role='Analyst'
         )
         
-        # Aaj ki date nikal li
         today = timezone.now().date()
 
-        # Dummy data mein date aur created_by add kar diya taaki DB error na de
         FinancialRecord.objects.create(
             amount=10000, type='Income', category='Salary', 
             date=today, created_by=self.analyst_user
@@ -26,7 +24,6 @@ class DashboardAPITests(APITestCase):
         )
 
     def test_dashboard_summary_structure(self):
-        """Test ki Dashboard API 200 OK de aur data structure sahi ho."""
         self.client.force_authenticate(user=self.analyst_user)
         response = self.client.get('/api/dashboard/summary/')
         

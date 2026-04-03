@@ -2,7 +2,6 @@ from django.utils import timezone
 from datetime import timedelta
 from rest_framework.views import APIView
 from rest_framework.response import Response
-# Naye imports add kiye: DecimalField aur Value
 from django.db.models import Sum, DecimalField, Value
 from django.db.models.functions import Coalesce
 
@@ -42,7 +41,6 @@ class DashboardSummaryView(APIView):
             else:
                 queryset = queryset.filter(date__gte=threshold.date())
 
-        # YAHAN FIX KIYA HAI: Float (0.0) ki jagah explicit DecimalField use kiya
         total = queryset.aggregate(
             total=Coalesce(
                 Sum('amount'), 

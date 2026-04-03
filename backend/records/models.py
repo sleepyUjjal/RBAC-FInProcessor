@@ -25,12 +25,13 @@ class FinancialRecord(models.Model):
     amount = models.DecimalField(max_digits=15, decimal_places=2)
     type = models.CharField(max_length=20, choices=TYPE_CHOICES)
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='Other')
-    
-    # Naya field 'Other' category ke liye
     custom_category = models.CharField(max_length=100, blank=True, null=True)
-    
     description = models.TextField(blank=True, null=True)
     date = models.DateField()
+    
+    # Soft Delete Feature fields
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
     
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -38,7 +39,8 @@ class FinancialRecord(models.Model):
 
     def __str__(self):
         cat_name = self.custom_category if self.category == 'Other' else self.category
-        return f"{self.type} - {self.amount} ({cat_name})"
+        deleted_status = " (Deleted)" if self.is_deleted else ""
+        return f"{self.type} - {self.amount} ({cat_name}){deleted_status}"
 
 
 class AuditLog(models.Model):

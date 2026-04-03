@@ -1,11 +1,15 @@
-from rest_framework import viewsets, filters
+from rest_framework import viewsets, filters, status
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from django_filters.rest_framework import DjangoFilterBackend
+from django.utils import timezone
 from .models import FinancialRecord, AuditLog
 from .serializers import FinancialRecordSerializer, AuditLogSerializer
 from accounts.permissions import IsAdminUser, IsAnalystUser, IsViewerUser
 
 class FinancialRecordViewSet(viewsets.ModelViewSet):
-    queryset = FinancialRecord.objects.all().order_by('-date')
+    queryset = FinancialRecord.objects.filter(is_deleted=False).order_by('-date')
     serializer_class = FinancialRecordSerializer
     
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -14,41 +18,73 @@ class FinancialRecordViewSet(viewsets.ModelViewSet):
     ordering_fields = ['date', 'amount']
 
     def get_permissions(self):
-        # RBAC Logic
         if self.action in ['list', 'retrieve']:
             permission_classes = [IsAdminUser | IsAnalystUser]
         elif self.action in ['create', 'update', 'partial_update', 'destroy']:
-            permission_classes = [IsAdminUser] 
+            permission_classes = [IsAuthenticated] 
         else:
             permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
     
-    # Duplicate hata kar sirf ye wala rakha
     def perform_create(self, serializer):
-        instance = serializer.save(created_by=self.request.user)
+        user = self.request.user
+        
+        if user.role in ['Analyst', 'Viewer']:
+            raise PermissionDenied("Analysts and Viewers do not have permission to create records.")
+            
+        instance = serializer.save(created_by=user)
         AuditLog.objects.create(
-            user=self.request.user, action='CREATE',
+            user=user, action='CREATE',
             details=f"Created record #{instance.id} - {instance.type} of {instance.amount}"
         )
 
     def perform_update(self, serializer):
+        user = self.request.user
+        
+        if user.role in ['Analyst', 'Viewer']:
+            raise PermissionDenied("Analysts and Viewers do not have permission to update records.")
+            
+        if user.role != 'Admin' and serializer.instance.created_by != user:
+            raise PermissionDenied("You can only update your own records.")
+            
         instance = serializer.save()
         AuditLog.objects.create(
-            user=self.request.user, action='UPDATE',
+            user=user, action='UPDATE',
             details=f"Updated record #{instance.id} - {instance.type} of {instance.amount}"
         )
 
-    def perform_destroy(self, instance):
-        AuditLog.objects.create(
-            user=self.request.user, action='DELETE',
-            details=f"Deleted record #{instance.id} - {instance.type} of {instance.amount}"
-        )
-        instance.delete()
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        user = request.user
+
+        if user.role in ['Analyst', 'Viewer']:
+            return Response(
+                {"detail": "Analysts and Viewers do not have permission to delete records."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        log_details = f"record #{instance.id} - {instance.type} of {instance.amount}"
+
+        if user.role == 'Admin':
+            AuditLog.objects.create(user=user, action='DELETE', details=f"Hard Deleted {log_details}")
+            instance.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        if instance.created_by != user:
+            return Response({"detail": "You can only delete your own records."}, status=status.HTTP_403_FORBIDDEN)
+        
+        instance.is_deleted = True
+        instance.deleted_at = timezone.now()
+        instance.save()
+        
+        AuditLog.objects.create(user=user, action='UPDATE', details=f"Soft Deleted {log_details}")
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = AuditLog.objects.all().order_by('-timestamp')
     serializer_class = AuditLogSerializer
-    permission_classes = [IsAdminUser] # Strictly Admin only
+    permission_classes = [IsAdminUser]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['action', 'user']
     search_fields = ['details']
