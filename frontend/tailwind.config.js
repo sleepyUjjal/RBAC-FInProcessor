@@ -13,8 +13,8 @@ export default {
         forest: '#0E300E',   // Success states or dark accents
       },
       fontFamily: {
-        serif: ['"Libre Baskerville"', 'Baskerville', 'serif'],
-        sans: ['"Josefin Sans"', 'sans-serif'],
+        serif: ['"SF Pro Display"', '"SF Pro Text"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+        sans: ['"SF Pro Text"', '"SF Pro Display"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
       }
     },
   },
