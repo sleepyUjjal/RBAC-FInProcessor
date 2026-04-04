@@ -111,6 +111,9 @@ const LandingPage = () => {
                 <Link className="hover:opacity-70" to="/contact">
                   Contact
                 </Link>
+                <Link className="hover:opacity-70 font-semibold text-[var(--gold)]" to="/docs">
+                  API Docs
+                </Link>
               </nav>
 
               <div className="flex items-center gap-2">

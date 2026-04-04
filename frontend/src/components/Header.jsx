@@ -56,6 +56,12 @@ const Header = ({ onMenuToggle }) => {
           >
             Contact
           </Link>
+          <Link
+            className="rounded-full border border-[var(--gold)] bg-[var(--surface-strong)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--gold)] transition-colors hover:bg-[var(--surface-muted)]"
+            to="/docs"
+          >
+            API Docs
+          </Link>
         </div>
         <span className="rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em]">
           {user?.rawRole || "User"}

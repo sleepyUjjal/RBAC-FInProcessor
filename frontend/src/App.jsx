@@ -5,6 +5,7 @@ import AppLayout from "./components/AppLayout";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AuditLogs from "./pages/AuditLogs";
+import ApiDocs from "./pages/ApiDocs";
 import Contact from "./pages/Contact";
 import Dashboard from "./pages/Dashboard";
 import LandingPage from "./pages/LandingPage";
@@ -28,6 +29,7 @@ function App() {
           <Route element={<Login />} path="/login" />
           <Route element={<Register />} path="/register" />
           <Route element={<Unauthorized />} path="/unauthorized" />
+          <Route element={<ApiDocs />} path="/docs" />
 
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
