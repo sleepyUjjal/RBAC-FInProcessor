@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 from drf_spectacular.utils import extend_schema, inline_serializer
 
 # Custom imports
-from .serializers import RegisterSerializer, UserSerializer, UserManagementSerializer
+from .serializers import RegisterSerializer, UserSerializer, UserManagementSerializer, CustomTokenObtainPairSerializer
 from .permissions import IsAdminUser, IsStaffOrAnalyst
 
 User = get_user_model()
@@ -23,6 +23,8 @@ class RegisterView(generics.CreateAPIView):
 
 # Login View (JWT + HttpOnly Cookie)
 class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         

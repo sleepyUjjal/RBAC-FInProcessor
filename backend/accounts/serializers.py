@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -42,3 +43,22 @@ class UserManagementSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'email', 'first_name', 'last_name', 'role', 'is_active', 'date_joined')
         read_only_fields = ('id', 'email', 'first_name', 'last_name', 'date_joined')
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        email = attrs.get(self.username_field)
+        password = attrs.get("password")
+
+        if email and password:
+            try:
+                user = User.objects.get(**{self.username_field: email})
+            except User.DoesNotExist:
+                raise serializers.ValidationError("User does not exist with this email.")
+
+            if not user.check_password(password):
+                raise serializers.ValidationError("Invalid password.")
+                
+            if not user.is_active:
+                raise serializers.ValidationError("User account is disabled.")
+
+        return super().validate(attrs)
