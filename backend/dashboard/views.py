@@ -1,17 +1,18 @@
-from django.utils import timezone
+from collections import defaultdict
 from datetime import timedelta
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import serializers
-from django.db.models import Sum, DecimalField, Value
+from decimal import Decimal
+
+from django.db.models import DecimalField, Sum, Value
 from django.db.models.functions import Coalesce
-
-# Swagger Documentation ke liye imports
-from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
+from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
+from rest_framework import serializers
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from records.models import FinancialRecord
 from accounts.permissions import IsAdminUser, IsAnalystUser, IsViewerUser
+from records.models import FinancialRecord
 
 DashboardTypeSummarySerializer = inline_serializer(
     name='DashboardTypeSummary',
@@ -19,6 +20,7 @@ DashboardTypeSummarySerializer = inline_serializer(
         'total': serializers.DecimalField(max_digits=15, decimal_places=2),
         'period': serializers.CharField(),
         'categories': serializers.ListField(child=serializers.DictField()),
+        'timeline': serializers.ListField(child=serializers.DictField()),
     },
 )
 
@@ -33,6 +35,7 @@ DashboardSummaryResponseSerializer = inline_serializer(
     },
 )
 
+
 class DashboardSummaryView(APIView):
     permission_classes = [IsAdminUser | IsAnalystUser | IsViewerUser]
 
@@ -40,21 +43,21 @@ class DashboardSummaryView(APIView):
         now = timezone.now()
         if period == '1h':
             return now - timedelta(hours=1)
-        elif period == '1d':
+        if period == '1d':
             return now - timedelta(days=1)
-        elif period == '1w':
+        if period == '1w':
             return now - timedelta(weeks=1)
-        elif period == '1m':
+        if period == '1m':
             return now - timedelta(days=30)
-        elif period == '1y':
+        if period == '1y':
             return now - timedelta(days=365)
-        elif period == '5y':
+        if period == '5y':
             return now - timedelta(days=365 * 5)
-        return None  
+        return None
 
-    def get_summary_by_type(self, record_type, period):
+    def get_filtered_queryset(self, record_type, period):
         threshold = self.get_time_threshold(period)
-        queryset = FinancialRecord.objects.filter(type=record_type)
+        queryset = FinancialRecord.objects.filter(type=record_type, is_deleted=False)
 
         if threshold:
             if period in ['1h', '1d']:
@@ -62,50 +65,83 @@ class DashboardSummaryView(APIView):
             else:
                 queryset = queryset.filter(date__gte=threshold.date())
 
+        return queryset
+
+    def get_timeline_bucket(self, record, period):
+        if period == '1h':
+            point = timezone.localtime(record.created_at).replace(minute=0, second=0, microsecond=0)
+            return point.isoformat(), point.strftime('%H:%M')
+
+        if period == '1d':
+            point = timezone.localtime(record.created_at).replace(minute=0, second=0, microsecond=0)
+            return point.isoformat(), point.strftime('%d %b %H:%M')
+
+        if period in ['1w', '1m']:
+            point = record.date
+            return point.isoformat(), point.strftime('%d %b')
+
+        if period == '1y':
+            point = record.date.replace(day=1)
+            return point.isoformat(), point.strftime('%b %Y')
+
+        point = record.date.replace(month=1, day=1)
+        return point.isoformat(), point.strftime('%Y')
+
+    def get_timeline_by_type(self, queryset, period):
+        timeline_map = defaultdict(lambda: {"bucket": "", "label": "", "amount": Decimal("0")})
+
+        for record in queryset.only('amount', 'date', 'created_at'):
+            bucket, label = self.get_timeline_bucket(record, period)
+            timeline_map[bucket]["bucket"] = bucket
+            timeline_map[bucket]["label"] = label
+            timeline_map[bucket]["amount"] += record.amount or Decimal("0")
+
+        ordered_keys = sorted(timeline_map.keys())
+        return [timeline_map[key] for key in ordered_keys]
+
+    def get_summary_by_type(self, record_type, period):
+        queryset = self.get_filtered_queryset(record_type, period)
+
         total = queryset.aggregate(
             total=Coalesce(
-                Sum('amount'), 
-                Value(0, output_field=DecimalField()), 
-                output_field=DecimalField()
+                Sum('amount'),
+                Value(0, output_field=DecimalField()),
+                output_field=DecimalField(),
             )
         )['total']
-        
-        categories = queryset.values('category').annotate(
-            amount=Sum('amount')
-        ).order_by('-amount')
+
+        categories = queryset.values('category').annotate(amount=Sum('amount')).order_by('-amount')
 
         return {
             "total": total,
             "period": period,
-            "categories": categories
+            "categories": categories,
+            "timeline": self.get_timeline_by_type(queryset, period),
         }
 
-    # ==========================================
-    # Swagger (drf-spectacular) Configuration
-    # ==========================================
     @extend_schema(
         request=None,
         responses={200: DashboardSummaryResponseSerializer},
         parameters=[
             OpenApiParameter(
-                name='income_range', 
-                description='Filter Income (e.g., 1h, 1d, 1w, 1m, 1y, 5y, all)', 
-                required=False, 
-                type=OpenApiTypes.STR
+                name='income_range',
+                description='Filter Income (e.g., 1h, 1d, 1w, 1m, 1y, 5y, all)',
+                required=False,
+                type=OpenApiTypes.STR,
             ),
             OpenApiParameter(
-                name='expense_range', 
-                description='Filter Expense (e.g., 1h, 1d, 1w, 1m, 1y, 5y, all)', 
-                required=False, 
-                type=OpenApiTypes.STR
+                name='expense_range',
+                description='Filter Expense (e.g., 1h, 1d, 1w, 1m, 1y, 5y, all)',
+                required=False,
+                type=OpenApiTypes.STR,
             ),
             OpenApiParameter(
-                name='investment_range', 
-                description='Filter Investment (e.g., 1h, 1d, 1w, 1m, 1y, 5y, all)', 
-                required=False, 
-                type=OpenApiTypes.STR
+                name='investment_range',
+                description='Filter Investment (e.g., 1h, 1d, 1w, 1m, 1y, 5y, all)',
+                required=False,
+                type=OpenApiTypes.STR,
             ),
-        ]
+        ],
     )
     def get(self, request):
         income_p = request.query_params.get('income_range', 'all')
@@ -123,5 +159,5 @@ class DashboardSummaryView(APIView):
             "income": income_data,
             "expense": expense_data,
             "investment": investment_data,
-            "server_time": timezone.now()
+            "server_time": timezone.now(),
         })

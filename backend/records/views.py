@@ -6,7 +6,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from .models import FinancialRecord, AuditLog
 from .serializers import FinancialRecordSerializer, AuditLogSerializer
-from accounts.permissions import IsAdminUser, IsAnalystUser, IsViewerUser
+from accounts.permissions import IsAdminUser
 
 class FinancialRecordViewSet(viewsets.ModelViewSet):
     queryset = FinancialRecord.objects.filter(is_deleted=False).order_by('-date')
@@ -19,12 +19,27 @@ class FinancialRecordViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
-            permission_classes = [IsAdminUser | IsAnalystUser]
+            permission_classes = [IsAuthenticated]
         elif self.action in ['create', 'update', 'partial_update', 'destroy']:
             permission_classes = [IsAuthenticated] 
         else:
             permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
+
+    def get_queryset(self):
+        queryset = FinancialRecord.objects.filter(is_deleted=False).order_by('-date')
+        user = self.request.user
+
+        if not user.is_authenticated:
+            return queryset.none()
+
+        if user.role == 'User':
+            return queryset.filter(created_by=user)
+
+        if user.role in ['Admin', 'Analyst', 'Viewer']:
+            return queryset
+
+        return queryset.none()
     
     def perform_create(self, serializer):
         user = self.request.user
