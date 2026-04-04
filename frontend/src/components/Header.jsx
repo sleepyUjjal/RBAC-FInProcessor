@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 
 const Header = () => {
@@ -29,6 +29,20 @@ const Header = () => {
       </div>
 
       <div className="flex items-center gap-3">
+        <div className="hidden items-center gap-2 md:flex">
+          <Link
+            className="rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-h)] hover:bg-[var(--surface-muted)]"
+            to="/#mission"
+          >
+            Mission
+          </Link>
+          <Link
+            className="rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-h)] hover:bg-[var(--surface-muted)]"
+            to="/contact"
+          >
+            Contact
+          </Link>
+        </div>
         <span className="rounded-full border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em]">
           {user?.rawRole || "User"}
         </span>

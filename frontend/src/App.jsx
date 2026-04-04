@@ -5,6 +5,7 @@ import AppLayout from "./components/AppLayout";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AuditLogs from "./pages/AuditLogs";
+import Contact from "./pages/Contact";
 import Dashboard from "./pages/Dashboard";
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
@@ -23,6 +24,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route element={<LandingPage />} path="/" />
+          <Route element={<Contact />} path="/contact" />
           <Route element={<Login />} path="/login" />
           <Route element={<Register />} path="/register" />
           <Route element={<Unauthorized />} path="/unauthorized" />

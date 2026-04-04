@@ -32,6 +32,11 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-6 fade-in-up">
       <div className="glass-panel w-full max-w-md p-8 md:p-10">
+        <div className="mb-4 flex justify-end">
+          <Link className="btn-secondary px-4 py-2 text-sm" to="/">
+            Back to Home
+          </Link>
+        </div>
         <p className="text-center text-xs uppercase tracking-[0.18em] text-[var(--text)]">Welcome Back</p>
         <h2 className="mb-2 mt-3 text-center text-3xl">Login</h2>
         <p className="mb-7 text-center text-sm">Use your RBAC-FInProcessor account credentials.</p>

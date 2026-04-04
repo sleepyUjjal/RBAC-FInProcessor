@@ -1,13 +1,22 @@
 import { Link, Navigate } from "react-router-dom";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { useAuth } from "../context/useAuth";
 
 const partnerMarks = ["Klarna", "Coinbase", "Instacart", "Notion"];
 
 const scaleFeatures = [
-  {
-    title: "Fast Transfers",
-    description: "Create scheduled payouts and move approved funds with complete traceability.",
-  },
   {
     title: "Multi-Account Control",
     description: "Run multiple account views with role guardrails and unified oversight.",
@@ -35,6 +44,36 @@ const launchSteps = [
     description: "Use logs, summaries, and dashboards to keep operations reliable at scale.",
   },
 ];
+
+const heroIncomeTrend = [
+  { t: "Mon", value: 28 },
+  { t: "Tue", value: 32 },
+  { t: "Wed", value: 30 },
+  { t: "Thu", value: 37 },
+  { t: "Fri", value: 35 },
+  { t: "Sat", value: 41 },
+  { t: "Sun", value: 39 },
+];
+
+const heroExpenseTrend = [
+  { t: "W1", value: 14 },
+  { t: "W2", value: 18 },
+  { t: "W3", value: 16 },
+  { t: "W4", value: 21 },
+  { t: "W5", value: 17 },
+  { t: "W6", value: 23 },
+];
+
+const heroInvestmentTrend = [
+  { t: "Jan", value: 11 },
+  { t: "Feb", value: 13 },
+  { t: "Mar", value: 17 },
+  { t: "Apr", value: 16 },
+  { t: "May", value: 22 },
+  { t: "Jun", value: 25 },
+];
+
+const heroTooltipFormatter = (value) => [`₹${Number(value || 0).toLocaleString("en-IN")}`, "Value"];
 
 const LandingPage = () => {
   const { isAuthenticated, loading } = useAuth();
@@ -66,12 +105,12 @@ const LandingPage = () => {
                 <a className="hover:opacity-70" href="#features">
                   Features
                 </a>
-                <a className="hover:opacity-70" href="#why-us">
-                  Why Us
+                <a className="hover:opacity-70" href="#mission">
+                  Our Mission
                 </a>
-                <a className="hover:opacity-70" href="#plans">
-                  Plans
-                </a>
+                <Link className="hover:opacity-70" to="/contact">
+                  Contact
+                </Link>
               </nav>
 
               <div className="flex items-center gap-2">
@@ -110,101 +149,84 @@ const LandingPage = () => {
               </div>
             </div>
 
-            <div className="relative mx-auto w-full max-w-md">
-              <div className="absolute -right-10 -top-10 h-44 w-44 rounded-full bg-[rgba(252,163,17,0.16)]" />
-              <div className="relative rounded-3xl border border-[var(--border)] bg-[rgba(255,255,255,0.96)] p-5 shadow-[var(--shadow-md)]">
-                <p className="text-xs uppercase tracking-[0.12em] text-[var(--text)]">Invoice</p>
-                <p className="mt-2 text-3xl font-semibold text-[var(--text-h)]">₹1,876,580</p>
-                <p className="mt-1 text-sm">Apr 2026 settlement window</p>
+            <div className="relative mx-auto w-full max-w-xl">
+              <div className="absolute -right-8 -top-6 h-40 w-40 rounded-full bg-[rgba(252,163,17,0.14)]" />
+              <div className="absolute -left-8 bottom-8 h-32 w-32 rounded-full bg-[rgba(20,33,61,0.1)]" />
 
-                <div className="mt-5 space-y-2">
-                  <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-strong)] p-3 text-sm">
-                    Credit Account
+              <div className="relative grid gap-3 md:grid-cols-2">
+                <article className="panel-elevated md:col-span-2 p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-xs uppercase tracking-[0.12em] text-[var(--text)]">Income Momentum</p>
+                    <p className="text-xs font-semibold text-[var(--text-h)]">+12.4%</p>
                   </div>
-                  <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-strong)] p-3 text-sm">
-                    Bank Account
+                  <div className="h-36">
+                    <ResponsiveContainer height="100%" width="100%">
+                      <AreaChart data={heroIncomeTrend} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="heroIncomeFill" x1="0" x2="0" y1="0" y2="1">
+                            <stop offset="5%" stopColor="#14213D" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#14213D" stopOpacity={0.04} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid stroke="rgba(20,33,61,0.12)" strokeDasharray="3 3" />
+                        <XAxis axisLine={false} dataKey="t" tick={false} tickLine={false} />
+                        <YAxis axisLine={false} tick={false} tickLine={false} />
+                        <Tooltip formatter={heroTooltipFormatter} labelFormatter={(value) => `${value}`} />
+                        <Area
+                          dataKey="value"
+                          fill="url(#heroIncomeFill)"
+                          stroke="#14213D"
+                          strokeWidth={2.2}
+                          type="monotone"
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
                   </div>
-                </div>
+                </article>
 
-                <button className="btn-secondary mt-5 w-full py-2.5 text-sm" type="button">
-                  Pay Now
-                </button>
-              </div>
+                <article className="panel-elevated p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-xs uppercase tracking-[0.12em] text-[var(--text)]">Expense Wave</p>
+                    <p className="text-xs font-semibold text-[var(--text-h)]">-3.1%</p>
+                  </div>
+                  <div className="h-28">
+                    <ResponsiveContainer height="100%" width="100%">
+                      <LineChart data={heroExpenseTrend} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+                        <CartesianGrid stroke="rgba(20,33,61,0.1)" strokeDasharray="3 3" />
+                        <XAxis axisLine={false} dataKey="t" tick={false} tickLine={false} />
+                        <YAxis axisLine={false} tick={false} tickLine={false} />
+                        <Tooltip formatter={heroTooltipFormatter} labelFormatter={(value) => `${value}`} />
+                        <Line
+                          dataKey="value"
+                          dot={{ fill: "#000000", r: 2 }}
+                          stroke="#000000"
+                          strokeWidth={2}
+                          type="monotone"
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </article>
 
-              <div className="absolute -right-5 top-12 w-52 rounded-2xl bg-[var(--gold-deep)] p-4 text-white shadow-[var(--shadow-md)]">
-                <p className="text-xs uppercase tracking-[0.12em] text-[rgba(255,255,255,0.8)]">Card Vault</p>
-                <p className="mt-2 text-xl font-semibold">234 ••••</p>
-                <p className="mt-6 text-sm font-medium text-[rgba(255,255,255,0.92)]">FIN VISA</p>
+                <article className="panel-elevated p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-xs uppercase tracking-[0.12em] text-[var(--text)]">Investment Pulse</p>
+                    <p className="text-xs font-semibold text-[var(--text-h)]">+8.9%</p>
+                  </div>
+                  <div className="h-28">
+                    <ResponsiveContainer height="100%" width="100%">
+                      <BarChart data={heroInvestmentTrend} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+                        <CartesianGrid stroke="rgba(20,33,61,0.08)" strokeDasharray="3 3" />
+                        <XAxis axisLine={false} dataKey="t" tick={false} tickLine={false} />
+                        <YAxis axisLine={false} tick={false} tickLine={false} />
+                        <Tooltip formatter={heroTooltipFormatter} labelFormatter={(value) => `${value}`} />
+                        <Bar dataKey="value" fill="#FCA311" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </article>
               </div>
             </div>
-          </div>
-        </section>
-
-        <section className="panel-elevated p-6 md:p-10" id="features">
-          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-            <div>
-              <p className="text-xs uppercase tracking-[0.16em] text-[var(--text)]">Future Payments</p>
-              <h2 className="mt-3 max-w-md">Experience that grows with your scale.</h2>
-            </div>
-            <p className="max-w-md text-sm md:text-base">
-              Design a finance operating layer that works for your team today and remains consistent as
-              your volume increases.
-            </p>
-          </div>
-
-          <div className="mt-7 grid gap-3 md:grid-cols-3">
-            {scaleFeatures.map((feature) => (
-              <article className="rounded-2xl border border-[var(--border)] bg-[rgba(255,255,255,0.95)] p-5" key={feature.title}>
-                <p className="text-base font-semibold text-[var(--text-h)]">{feature.title}</p>
-                <p className="mt-2 text-sm leading-relaxed">{feature.description}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="space-y-4" id="why-us">
-          <div className="text-center">
-            <p className="text-xs uppercase tracking-[0.16em] text-[var(--text)]">Why Us</p>
-            <h2 className="mt-2">Why teams prefer FinProcessor</h2>
-          </div>
-
-          <div className="grid gap-3 md:grid-cols-2">
-            <article className="panel-elevated p-6">
-              <p className="text-5xl font-semibold text-[var(--gold-deep)]">3k+</p>
-              <p className="mt-3 max-w-xs text-base text-[var(--text-h)]">Businesses already managing records in our workspace.</p>
-            </article>
-            <article className="panel-elevated p-6">
-              <p className="text-lg font-semibold text-[var(--text-h)]">Instant withdrawal workflow</p>
-              <p className="mt-2 text-sm">Approve, route, and settle funds without switching tools.</p>
-              <div className="mt-4 flex items-center gap-3 text-sm">
-                <span className="rounded-full bg-[rgba(252,163,17,0.2)] px-3 py-1 font-medium text-[var(--gold-deep)]">Wallet</span>
-                <span>→</span>
-                <span className="rounded-full bg-[rgba(20,33,61,0.14)] px-3 py-1 font-medium text-[var(--forest)]">Bank</span>
-              </div>
-            </article>
-            <article className="panel-elevated p-6 md:col-span-2">
-              <div className="grid gap-6 md:grid-cols-[0.4fr_0.6fr]">
-                <div>
-                  <p className="text-lg font-semibold text-[var(--text-h)]">No asset volatility</p>
-                  <p className="mt-2 text-sm leading-relaxed">
-                    Operating on disciplined records means predictable decisions and measurable progress.
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-[var(--border)] bg-[rgba(255,255,255,0.95)] p-4">
-                  <p className="text-xs uppercase tracking-[0.12em] text-[var(--text)]">Summary</p>
-                  <p className="mt-1 text-2xl font-semibold text-[var(--text-h)]">₹1,876,580</p>
-                  <div className="mt-4 h-32 rounded-xl bg-[linear-gradient(180deg,rgba(20,33,61,0.2),rgba(252,163,17,0.12))]" />
-                  <div className="mt-2 flex justify-between text-xs text-[var(--text)]">
-                    <span>Jan</span>
-                    <span>Feb</span>
-                    <span>Mar</span>
-                    <span>Apr</span>
-                    <span>May</span>
-                    <span>Jun</span>
-                  </div>
-                </div>
-              </div>
-            </article>
           </div>
         </section>
 
@@ -223,7 +245,29 @@ const LandingPage = () => {
           </div>
         </section>
 
-        <section className="panel-elevated p-6 text-center md:p-10">
+        <section className="panel-elevated p-6 md:p-10" id="features">
+          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+            <div>
+              <p className="text-xs uppercase tracking-[0.16em] text-[var(--text)]">Features</p>
+              <h2 className="mt-3 max-w-md">Experience that grows with your scale.</h2>
+            </div>
+            <p className="max-w-md text-sm md:text-base">
+              Design a finance operating layer that works for your team today and remains consistent as
+              your volume increases.
+            </p>
+          </div>
+
+          <div className="mt-7 grid gap-3 md:grid-cols-2">
+            {scaleFeatures.map((feature) => (
+              <article className="rounded-2xl border border-[var(--border)] bg-[rgba(255,255,255,0.95)] p-5" key={feature.title}>
+                <p className="text-base font-semibold text-[var(--text-h)]">{feature.title}</p>
+                <p className="mt-2 text-sm leading-relaxed">{feature.description}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="panel-elevated p-6 text-center md:p-10" id="mission">
           <p className="text-xs uppercase tracking-[0.16em] text-[var(--text)]">Our Mission</p>
           <h2 className="mt-3">We help modern finance teams work with confidence.</h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm md:text-base">
@@ -243,28 +287,6 @@ const LandingPage = () => {
               <p className="text-4xl font-semibold text-[var(--gold-deep)]">10+</p>
               <p className="mt-2 text-sm">Countries supported</p>
             </div>
-          </div>
-        </section>
-
-        <section className="space-y-4" id="plans">
-          <div className="text-center">
-            <p className="text-xs uppercase tracking-[0.16em] text-[var(--text)]">Choose Plan</p>
-            <h2 className="mt-2">Built for growing operations.</h2>
-          </div>
-
-          <div className="grid gap-3 md:grid-cols-2">
-            <article className="panel-elevated p-6">
-              <p className="text-3xl font-semibold text-[var(--text-h)]">Plus</p>
-              <p className="mt-6 text-2xl text-[var(--text-h)]">₹299/month</p>
-              <p className="mt-2 text-sm">For focused teams that need secure record workflows.</p>
-            </article>
-            <article className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[linear-gradient(140deg,var(--gold-deep),var(--gold))] p-6 text-white shadow-[var(--shadow-md)]">
-              <p className="text-3xl font-semibold">Premium</p>
-              <p className="mt-6 text-2xl">₹699/month</p>
-              <p className="mt-2 text-sm text-[rgba(255,255,255,0.9)]">
-                For scale teams needing advanced control, dashboards, and governance.
-              </p>
-            </article>
           </div>
         </section>
 
@@ -289,28 +311,35 @@ const LandingPage = () => {
         </section>
 
         <footer className="rounded-3xl border border-[var(--border)] bg-[rgba(255,255,255,0.86)] p-6 md:p-8">
-          <div className="grid gap-6 md:grid-cols-4">
+          <div className="grid gap-6 md:grid-cols-2">
             <div>
               <p className="text-lg font-semibold text-[var(--text-h)]">FinProcessor</p>
               <p className="mt-2 text-sm">Secure records, trusted operations, and premium clarity.</p>
             </div>
             <div>
-              <p className="text-sm font-semibold text-[var(--text-h)]">Solutions</p>
-              <p className="mt-2 text-sm">Small Business</p>
-              <p className="mt-1 text-sm">Enterprise</p>
-              <p className="mt-1 text-sm">Governance</p>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-[var(--text-h)]">Company</p>
-              <p className="mt-2 text-sm">About</p>
-              <p className="mt-1 text-sm">Careers</p>
-              <p className="mt-1 text-sm">Contact</p>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-[var(--text-h)]">Legal</p>
-              <p className="mt-2 text-sm">Privacy</p>
-              <p className="mt-1 text-sm">Terms</p>
-              <p className="mt-1 text-sm">Policies</p>
+              <p className="text-sm font-semibold text-[var(--text-h)]">Contact</p>
+              <Link className="mt-2 block text-sm hover:opacity-70" to="/contact">
+                Contact Page
+              </Link>
+              <a className="mt-1 block text-sm hover:opacity-70" href="mailto:ujjaldeep.work@gmail.com">
+                ujjaldeep.work@gmail.com
+              </a>
+              <a
+                className="mt-1 block text-sm hover:opacity-70"
+                href="https://www.linkedin.com/in/ujjaldeep"
+                rel="noreferrer"
+                target="_blank"
+              >
+                LinkedIn
+              </a>
+              <a
+                className="mt-1 block text-sm hover:opacity-70"
+                href="https://github.com/sleepyUjjal"
+                rel="noreferrer"
+                target="_blank"
+              >
+                GitHub
+              </a>
             </div>
           </div>
           <div className="mt-6 border-t border-[var(--border)] pt-4 text-center text-sm">
