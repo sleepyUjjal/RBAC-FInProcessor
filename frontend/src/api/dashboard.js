@@ -9,9 +9,9 @@ export const getDashboardSummary = (ranges = {}, options = {}) => {
     investment_range: ranges.investmentRange ?? "all",
   };
   
-  if (ranges.userId) {
-    query.user_id = ranges.userId;
-  }
+  if (ranges.incomeUserId) query.income_user_id = ranges.incomeUserId;
+  if (ranges.expenseUserId) query.expense_user_id = ranges.expenseUserId;
+  if (ranges.investmentUserId) query.investment_user_id = ranges.investmentUserId;
 
   return apiClient.get(DASHBOARD_SUMMARY_ENDPOINT, {
     query,

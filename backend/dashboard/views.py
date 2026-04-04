@@ -55,7 +55,7 @@ class DashboardSummaryView(APIView):
             return now - timedelta(days=365 * 5)
         return None
 
-    def get_filtered_queryset(self, record_type, period):
+    def get_filtered_queryset(self, record_type, period, target_user_id=None):
         threshold = self.get_time_threshold(period)
         queryset = FinancialRecord.objects.filter(type=record_type, is_deleted=False)
         
@@ -63,7 +63,6 @@ class DashboardSummaryView(APIView):
         if user.role == 'User':
             queryset = queryset.filter(created_by=user)
         elif user.role in ['Admin', 'Analyst']:
-            target_user_id = self.request.query_params.get('user_id')
             if target_user_id:
                 queryset = queryset.filter(created_by_id=target_user_id)
 
@@ -107,8 +106,8 @@ class DashboardSummaryView(APIView):
         ordered_keys = sorted(timeline_map.keys())
         return [timeline_map[key] for key in ordered_keys]
 
-    def get_summary_by_type(self, record_type, period):
-        queryset = self.get_filtered_queryset(record_type, period)
+    def get_summary_by_type(self, record_type, period, target_user_id=None):
+        queryset = self.get_filtered_queryset(record_type, period, target_user_id)
 
         total = queryset.aggregate(
             total=Coalesce(
@@ -150,8 +149,20 @@ class DashboardSummaryView(APIView):
                 type=OpenApiTypes.STR,
             ),
             OpenApiParameter(
-                name='user_id',
-                description='Filter by specific user ID (Admin/Analyst only)',
+                name='income_user_id',
+                description='Filter Income chart by specific user ID (Admin/Analyst only)',
+                required=False,
+                type=OpenApiTypes.INT,
+            ),
+            OpenApiParameter(
+                name='expense_user_id',
+                description='Filter Expense chart by specific user ID (Admin/Analyst only)',
+                required=False,
+                type=OpenApiTypes.INT,
+            ),
+            OpenApiParameter(
+                name='investment_user_id',
+                description='Filter Investment chart by specific user ID (Admin/Analyst only)',
                 required=False,
                 type=OpenApiTypes.INT,
             ),
@@ -162,9 +173,13 @@ class DashboardSummaryView(APIView):
         expense_p = request.query_params.get('expense_range', 'all')
         investment_p = request.query_params.get('investment_range', 'all')
 
-        income_data = self.get_summary_by_type('Income', income_p)
-        expense_data = self.get_summary_by_type('Expense', expense_p)
-        investment_data = self.get_summary_by_type('Investment', investment_p)
+        income_u = request.query_params.get('income_user_id')
+        expense_u = request.query_params.get('expense_user_id')
+        investment_u = request.query_params.get('investment_user_id')
+
+        income_data = self.get_summary_by_type('Income', income_p, income_u)
+        expense_data = self.get_summary_by_type('Expense', expense_p, expense_u)
+        investment_data = self.get_summary_by_type('Investment', investment_p, investment_u)
 
         net_balance = income_data['total'] - expense_data['total']
 

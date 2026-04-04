@@ -119,12 +119,35 @@ const PieTooltipCard = ({ active, payload }) => {
   );
 };
 
-const StockTrendCard = ({ title, data, lineColor, fillStart, fillEnd, loading, rangeLabel }) => {
+const StockTrendCard = ({ title, data, lineColor, fillStart, fillEnd, loading, rangeLabel, users, selectedUserId, onUserChange, canFilterUsers }) => {
   return (
     <article className="panel-elevated p-4">
-      <div className="mb-3">
-        <h3 className="text-lg">{title}</h3>
-        <p className="text-xs uppercase tracking-[0.08em] text-[var(--text)]">Range: {rangeLabel}</p>
+      <div className="mb-3 flex items-center justify-between">
+        <div>
+          <h3 className="text-lg">{title}</h3>
+          <p className="text-xs uppercase tracking-[0.08em] text-[var(--text)]">Range: {rangeLabel}</p>
+        </div>
+        {canFilterUsers && (
+          <div className="relative inline-block group" title="Filter specific user">
+            <button type="button" className="pointer-events-none flex h-7 w-7 items-center justify-center rounded-[4px] border-[1.5px] border-black bg-white opacity-50 transition group-hover:opacity-80">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/>
+              </svg>
+            </button>
+            <select
+              value={selectedUserId || ""}
+              onChange={(e) => onUserChange(e.target.value)}
+              className="absolute inset-0 z-10 w-full h-full opacity-0 cursor-pointer"
+            >
+              <option value="">All Users</option>
+              {users?.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.first_name ? `${u.first_name} ${u.last_name || ''}`.trim() : u.email}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {loading ? (
@@ -177,12 +200,35 @@ const StockTrendCard = ({ title, data, lineColor, fillStart, fillEnd, loading, r
   );
 };
 
-const ExpensePieCard = ({ data, loading }) => {
+const ExpensePieCard = ({ data, loading, users, selectedUserId, onUserChange, canFilterUsers }) => {
   return (
     <article className="panel-elevated p-4">
-      <div className="mb-3">
-        <h3 className="text-lg">Expense Breakdown</h3>
-        <p className="text-xs uppercase tracking-[0.08em] text-[var(--text)]">By Category</p>
+      <div className="mb-3 flex items-center justify-between">
+        <div>
+          <h3 className="text-lg">Expense Breakdown</h3>
+          <p className="text-xs uppercase tracking-[0.08em] text-[var(--text)]">By Category</p>
+        </div>
+        {canFilterUsers && (
+          <div className="relative inline-block group" title="Filter specific user">
+            <button type="button" className="pointer-events-none flex h-7 w-7 items-center justify-center rounded-[4px] border-[1.5px] border-black bg-white opacity-50 transition group-hover:opacity-80">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/>
+              </svg>
+            </button>
+            <select
+              value={selectedUserId || ""}
+              onChange={(e) => onUserChange(e.target.value)}
+              className="absolute inset-0 z-10 w-full h-full opacity-0 cursor-pointer"
+            >
+              <option value="">All Users</option>
+              {users?.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.first_name ? `${u.first_name} ${u.last_name || ''}`.trim() : u.email}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {loading ? (
@@ -228,13 +274,16 @@ const Dashboard = () => {
   const [refreshCounter, setRefreshCounter] = useState(0);
   const [selectedRange, setSelectedRange] = useState("1d");
   const [users, setUsers] = useState([]);
-  const [selectedUserId, setSelectedUserId] = useState("");
+  const [incomeUserId, setIncomeUserId] = useState("");
+  const [expenseUserId, setExpenseUserId] = useState("");
+  const [investmentUserId, setInvestmentUserId] = useState("");
 
-  const canFilterUsers = user?.role === "Admin" || user?.role === "Analyst";
+  const unrolledRole = user?.role?.toLowerCase() || "";
+  const canFilterUsers = unrolledRole === "admin" || unrolledRole === "analyst";
 
   useEffect(() => {
     let isMounted = true;
-    
+
     if (canFilterUsers) {
       listUsers()
         .then((data) => {
@@ -242,9 +291,9 @@ const Dashboard = () => {
             setUsers(data?.results || []);
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     }
-    
+
     return () => { isMounted = false; };
   }, [canFilterUsers]);
 
@@ -262,7 +311,9 @@ const Dashboard = () => {
             incomeRange: selectedRange,
             expenseRange: selectedRange,
             investmentRange: selectedRange,
-            userId: selectedUserId || undefined,
+            incomeUserId: incomeUserId || undefined,
+            expenseUserId: expenseUserId || undefined,
+            investmentUserId: investmentUserId || undefined,
           },
           { signal: controller.signal }
         );
@@ -288,7 +339,7 @@ const Dashboard = () => {
       isMounted = false;
       controller.abort();
     };
-  }, [selectedRange, refreshCounter, selectedUserId]);
+  }, [selectedRange, refreshCounter, incomeUserId, expenseUserId, investmentUserId]);
 
   const netBalance = Number(summary?.net_balance ?? 0);
   const incomeTotal = Number(summary?.income?.total ?? 0);
@@ -334,29 +385,14 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="flex flex-wrap gap-2 items-center">
-            {canFilterUsers && (
-              <select
-                className="rounded-xl border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-1.5 text-sm font-semibold text-[var(--text-h)] focus:border-[var(--gold)] focus:outline-none"
-                value={selectedUserId}
-                onChange={(e) => setSelectedUserId(e.target.value)}
-              >
-                <option value="">All Users</option>
-                {users.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.first_name ? `${u.first_name} ${u.last_name || ''}`.trim() : u.email}
-                  </option>
-                ))}
-              </select>
-            )}
             {PERIOD_OPTIONS.map((option) => {
               const active = selectedRange === option.value;
               return (
                 <button
-                  className={`rounded-xl border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] transition ${
-                    active
+                  className={`rounded-xl border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] transition ${active
                       ? "border-[var(--gold-deep)] bg-[var(--gold-deep)] text-white shadow-[var(--shadow-sm)]"
                       : "border-[var(--border)] bg-[var(--surface-strong)] text-[var(--text-h)] hover:bg-[var(--surface-muted)]"
-                  }`}
+                    }`}
                   key={option.value}
                   onClick={() => setSelectedRange(option.value)}
                   type="button"
@@ -377,6 +413,10 @@ const Dashboard = () => {
             loading={loading}
             rangeLabel={selectedRangeLabel}
             title="Income"
+            users={users}
+            selectedUserId={incomeUserId}
+            onUserChange={setIncomeUserId}
+            canFilterUsers={canFilterUsers}
           />
           <StockTrendCard
             data={expenseTimeline}
@@ -386,6 +426,10 @@ const Dashboard = () => {
             loading={loading}
             rangeLabel={selectedRangeLabel}
             title="Expense"
+            users={users}
+            selectedUserId={expenseUserId}
+            onUserChange={setExpenseUserId}
+            canFilterUsers={canFilterUsers}
           />
           <StockTrendCard
             data={investmentTimeline}
@@ -395,8 +439,19 @@ const Dashboard = () => {
             loading={loading}
             rangeLabel={selectedRangeLabel}
             title="Investment"
+            users={users}
+            selectedUserId={investmentUserId}
+            onUserChange={setInvestmentUserId}
+            canFilterUsers={canFilterUsers}
           />
-          <ExpensePieCard data={expensePieData} loading={loading} />
+          <ExpensePieCard 
+            data={expensePieData} 
+            loading={loading}
+            users={users}
+            selectedUserId={expenseUserId}
+            onUserChange={setExpenseUserId}
+            canFilterUsers={canFilterUsers}
+          />
         </div>
       </article>
 
