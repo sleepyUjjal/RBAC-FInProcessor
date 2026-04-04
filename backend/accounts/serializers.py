@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import get_user_model
 
@@ -53,12 +54,12 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             try:
                 user = User.objects.get(**{self.username_field: email})
             except User.DoesNotExist:
-                raise serializers.ValidationError("User does not exist with this email.")
+                raise AuthenticationFailed({"detail": "User does not exist with this email."})
 
             if not user.check_password(password):
-                raise serializers.ValidationError("Invalid password.")
+                raise AuthenticationFailed({"detail": "Invalid password."})
                 
             if not user.is_active:
-                raise serializers.ValidationError("User account is disabled.")
+                raise AuthenticationFailed({"detail": "User account is disabled."})
 
         return super().validate(attrs)
