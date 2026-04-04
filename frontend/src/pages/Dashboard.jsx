@@ -12,6 +12,7 @@ import {
   YAxis,
 } from "recharts";
 import { getDashboardSummary } from "../api/dashboard";
+import { listUsers } from "../api/users";
 import StatsCard from "../components/StatsCard";
 import { useAuth } from "../context/useAuth";
 
@@ -226,6 +227,26 @@ const Dashboard = () => {
   const [error, setError] = useState("");
   const [refreshCounter, setRefreshCounter] = useState(0);
   const [selectedRange, setSelectedRange] = useState("1d");
+  const [users, setUsers] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState("");
+
+  const canFilterUsers = user?.role === "Admin" || user?.role === "Analyst";
+
+  useEffect(() => {
+    let isMounted = true;
+    
+    if (canFilterUsers) {
+      listUsers()
+        .then((data) => {
+          if (isMounted) {
+            setUsers(data?.results || []);
+          }
+        })
+        .catch(() => {});
+    }
+    
+    return () => { isMounted = false; };
+  }, [canFilterUsers]);
 
   useEffect(() => {
     let isMounted = true;
@@ -241,6 +262,7 @@ const Dashboard = () => {
             incomeRange: selectedRange,
             expenseRange: selectedRange,
             investmentRange: selectedRange,
+            userId: selectedUserId || undefined,
           },
           { signal: controller.signal }
         );
@@ -266,7 +288,7 @@ const Dashboard = () => {
       isMounted = false;
       controller.abort();
     };
-  }, [selectedRange, refreshCounter]);
+  }, [selectedRange, refreshCounter, selectedUserId]);
 
   const netBalance = Number(summary?.net_balance ?? 0);
   const incomeTotal = Number(summary?.income?.total ?? 0);
@@ -311,7 +333,21 @@ const Dashboard = () => {
               Stock-style trend charts for Income, Expense, Investment + expense category pie chart.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 items-center">
+            {canFilterUsers && (
+              <select
+                className="rounded-xl border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-1.5 text-sm font-semibold text-[var(--text-h)] focus:border-[var(--gold)] focus:outline-none"
+                value={selectedUserId}
+                onChange={(e) => setSelectedUserId(e.target.value)}
+              >
+                <option value="">All Users</option>
+                {users.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.first_name ? `${u.first_name} ${u.last_name || ''}`.trim() : u.email}
+                  </option>
+                ))}
+              </select>
+            )}
             {PERIOD_OPTIONS.map((option) => {
               const active = selectedRange === option.value;
               return (

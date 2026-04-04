@@ -36,7 +36,7 @@ class FinancialRecordViewSet(viewsets.ModelViewSet):
         if user.role == 'User':
             return queryset.filter(created_by=user)
 
-        if user.role in ['Admin', 'Analyst', 'Viewer']:
+        if user.role in ['Admin', 'Analyst']:
             return queryset
 
         return queryset.none()
@@ -44,8 +44,8 @@ class FinancialRecordViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         user = self.request.user
         
-        if user.role in ['Analyst', 'Viewer']:
-            raise PermissionDenied("Analysts and Viewers do not have permission to create records.")
+        if user.role == 'Analyst':
+            raise PermissionDenied("Analysts do not have permission to create records.")
             
         instance = serializer.save(created_by=user)
         AuditLog.objects.create(
@@ -56,8 +56,8 @@ class FinancialRecordViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         user = self.request.user
         
-        if user.role in ['Analyst', 'Viewer']:
-            raise PermissionDenied("Analysts and Viewers do not have permission to update records.")
+        if user.role == 'Analyst':
+            raise PermissionDenied("Analysts do not have permission to update records.")
             
         if user.role != 'Admin' and serializer.instance.created_by != user:
             raise PermissionDenied("You can only update your own records.")
@@ -72,9 +72,9 @@ class FinancialRecordViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         user = request.user
 
-        if user.role in ['Analyst', 'Viewer']:
+        if user.role == 'Analyst':
             return Response(
-                {"detail": "Analysts and Viewers do not have permission to delete records."},
+                {"detail": "Analysts do not have permission to delete records."},
                 status=status.HTTP_403_FORBIDDEN
             )
         

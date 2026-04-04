@@ -11,7 +11,7 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from accounts.permissions import IsAdminUser, IsAnalystUser, IsViewerUser
+from rest_framework.permissions import IsAuthenticated
 from records.models import FinancialRecord
 
 DashboardTypeSummarySerializer = inline_serializer(
@@ -37,7 +37,7 @@ DashboardSummaryResponseSerializer = inline_serializer(
 
 
 class DashboardSummaryView(APIView):
-    permission_classes = [IsAdminUser | IsAnalystUser | IsViewerUser]
+    permission_classes = [IsAuthenticated]
 
     def get_time_threshold(self, period):
         now = timezone.now()
@@ -58,6 +58,14 @@ class DashboardSummaryView(APIView):
     def get_filtered_queryset(self, record_type, period):
         threshold = self.get_time_threshold(period)
         queryset = FinancialRecord.objects.filter(type=record_type, is_deleted=False)
+        
+        user = self.request.user
+        if user.role == 'User':
+            queryset = queryset.filter(created_by=user)
+        elif user.role in ['Admin', 'Analyst']:
+            target_user_id = self.request.query_params.get('user_id')
+            if target_user_id:
+                queryset = queryset.filter(created_by_id=target_user_id)
 
         if threshold:
             if period in ['1h', '1d']:
@@ -140,6 +148,12 @@ class DashboardSummaryView(APIView):
                 description='Filter Investment (e.g., 1h, 1d, 1w, 1m, 1y, 5y, all)',
                 required=False,
                 type=OpenApiTypes.STR,
+            ),
+            OpenApiParameter(
+                name='user_id',
+                description='Filter by specific user ID (Admin/Analyst only)',
+                required=False,
+                type=OpenApiTypes.INT,
             ),
         ],
     )

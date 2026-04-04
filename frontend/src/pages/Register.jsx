@@ -46,7 +46,7 @@ const Register = () => {
         </div>
         <p className="text-center text-xs uppercase tracking-[0.18em] text-[var(--text)]">Onboard Securely</p>
         <h2 className="mb-2 mt-3 text-center text-3xl">Create Account</h2>
-        <p className="mb-7 text-center text-sm">Register with allowed roles: User or Viewer.</p>
+        <p className="mb-7 text-center text-sm">Register as a User.</p>
 
         {error ? (
           <div className="alert-error mb-4 p-3 text-sm">
@@ -89,7 +89,6 @@ const Register = () => {
           />
           <select name="role" onChange={handleChange} value={formData.role}>
             <option value="User">User</option>
-            <option value="Viewer">Viewer</option>
           </select>
           <button className="btn-primary" disabled={submitting} type="submit">
             {submitting ? "Creating..." : "Register"}

@@ -11,7 +11,6 @@ const ROLE_OPTIONS = [
   { value: "", label: "All Roles" },
   { value: "Admin", label: "Admin" },
   { value: "Analyst", label: "Analyst" },
-  { value: "Viewer", label: "Viewer" },
   { value: "User", label: "User" },
 ];
 

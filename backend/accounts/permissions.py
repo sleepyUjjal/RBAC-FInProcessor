@@ -8,10 +8,6 @@ class IsAnalystUser(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.role == 'Analyst'
 
-class IsViewerUser(permissions.BasePermission):
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role == 'Viewer'
-
 # Mix Permission for Admin and Analyst
 class IsStaffOrAnalyst(permissions.BasePermission):
     def has_permission(self, request, view):

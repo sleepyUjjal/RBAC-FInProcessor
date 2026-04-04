@@ -15,7 +15,6 @@ const CATEGORY_OPTIONS = [
   "Health",
   "Shopping",
   "Education",
-  "Investment",
   "Other",
 ];
 
@@ -84,6 +83,7 @@ const RecordDetail = () => {
   });
 
   const showCustomCategory = form.category === "Other";
+  const hideCategorySelection = form.type === "Income" || form.type === "Investment";
 
   useEffect(() => {
     if (isCreateMode) {
@@ -154,12 +154,12 @@ const RecordDetail = () => {
     const payload = {
       amount: form.amount,
       type: form.type,
-      category: form.category,
+      category: form.type === "Income" ? "Income" : form.type === "Investment" ? "Investment" : form.category,
       description: form.description.trim() || null,
       date: form.date,
     };
 
-    if (form.category === "Other") {
+    if (payload.category === "Other") {
       payload.custom_category = form.custom_category.trim();
     } else {
       payload.custom_category = null;
@@ -306,18 +306,20 @@ const RecordDetail = () => {
             </select>
           </div>
 
-          <div>
-            <label className="mb-1 block text-sm">Category</label>
-            <select disabled={saving || !canSubmit} name="category" onChange={handleChange} value={form.category}>
-              {CATEGORY_OPTIONS.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-          </div>
+          {!hideCategorySelection && (
+            <div>
+              <label className="mb-1 block text-sm">Category</label>
+              <select disabled={saving || !canSubmit} name="category" onChange={handleChange} value={form.category}>
+                {CATEGORY_OPTIONS.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
-          {showCustomCategory ? (
+          {!hideCategorySelection && showCustomCategory ? (
             <div className="md:col-span-2">
               <label className="mb-1 block text-sm">Custom Category (required for Other)</label>
               <input

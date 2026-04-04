@@ -24,7 +24,6 @@ const CATEGORY_OPTIONS = [
   { value: "Health", label: "Health" },
   { value: "Shopping", label: "Shopping" },
   { value: "Education", label: "Education" },
-  { value: "Investment", label: "Investment" },
   { value: "Other", label: "Other" },
 ];
 
@@ -74,7 +73,7 @@ const parsePaginatedResponse = (response, currentPage) => {
 const RecordsList = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const role = user?.role || "";
+  const role = (user?.role || "").toLowerCase();
   const currentUserEmail = (user?.email || "").trim().toLowerCase();
   const canCreateRecords = role === "admin" || role === "user";
   const canManageAnyRecord = role === "admin";
@@ -289,7 +288,7 @@ const RecordsList = () => {
   const columns = [...baseColumns, actionColumn];
 
   return (
-    <section className="glass-panel mx-auto max-w-6xl p-8 md:p-10 fade-in-up">
+    <section className="glass-panel mx-auto max-w-6xl w-full min-w-0 overflow-hidden p-8 md:p-10 fade-in-up">
       <div className="mb-4">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-3xl">Records</h2>

@@ -12,7 +12,7 @@ from drf_spectacular.utils import extend_schema, inline_serializer
 
 # Custom imports
 from .serializers import RegisterSerializer, UserSerializer, UserManagementSerializer
-from .permissions import IsAdminUser
+from .permissions import IsAdminUser, IsStaffOrAnalyst
 
 User = get_user_model()
 
@@ -75,7 +75,13 @@ class UserProfileView(generics.RetrieveAPIView):
 class UserManagementViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserManagementSerializer
-    permission_classes = [IsAdminUser]
+    
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [IsStaffOrAnalyst]
+        else:
+            permission_classes = [IsAdminUser]
+        return [permission() for permission in permission_classes]
     
     # Filters for easy user management in admin panel
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]

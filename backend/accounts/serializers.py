@@ -22,7 +22,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         
         # RBAC Security Check:
         # No registration allowed for 'Admin' and 'Analyst' roles through public API.
-        # Only 'Viewer' and 'User' roles can be registered via this endpoint.
         if role in ['Admin', 'Analyst']:
             raise serializers.ValidationError(
                 {"role": f"Registration as {role} is restricted. Please contact the system administrator."}

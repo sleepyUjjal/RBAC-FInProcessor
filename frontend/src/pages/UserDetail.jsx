@@ -12,7 +12,7 @@ const DEFAULT_FORM = {
   is_active: true,
 };
 
-const ROLE_OPTIONS = ["Admin", "Analyst", "Viewer", "User"];
+const ROLE_OPTIONS = ["Admin", "Analyst", "User"];
 
 const buildApiErrorMessage = (error) => {
   const data = error?.data;

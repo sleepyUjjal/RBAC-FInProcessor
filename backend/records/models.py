@@ -14,6 +14,7 @@ class FinancialRecord(models.Model):
         ('Rent', 'Rent & Accommodation'),
         ('Salary', 'Salary/Active Income'),
         ('Utilities', 'Bills & Utilities'),
+        ('Income', 'Income'),
         ('Entertainment', 'Entertainment'),
         ('Health', 'Medical & Health'),
         ('Shopping', 'Shopping'),

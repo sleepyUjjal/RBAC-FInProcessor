@@ -22,7 +22,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     ROLE_CHOICES = (
         ('Admin', 'Admin'),             
         ('Analyst', 'Analyst'),         
-        ('Viewer', 'Viewer'),  
         ('User', 'User'),
     )
 
