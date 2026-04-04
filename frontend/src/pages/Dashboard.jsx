@@ -151,8 +151,13 @@ const StockTrendCard = ({ title, data, lineColor, fillStart, fillEnd, loading, r
       </div>
 
       {loading ? (
-        <div className="h-[250px] rounded-xl border border-[var(--border)] bg-[var(--surface-strong)] p-4 text-sm">
-          Loading chart...
+        <div className="h-[250px] rounded-xl border border-[var(--border)] bg-[var(--surface-strong)] p-2 animate-pulse flex items-end justify-between gap-2 overflow-hidden">
+          <div className="h-[40%] w-full rounded-t-md bg-[var(--surface-muted)] opacity-30"></div>
+          <div className="h-[70%] w-full rounded-t-md bg-[var(--surface-muted)] opacity-30"></div>
+          <div className="h-[50%] w-full rounded-t-md bg-[var(--surface-muted)] opacity-30"></div>
+          <div className="h-[85%] w-full rounded-t-md bg-[var(--surface-muted)] opacity-30"></div>
+          <div className="h-[60%] w-full rounded-t-md bg-[var(--surface-muted)] opacity-30"></div>
+          <div className="h-[95%] w-full rounded-t-md bg-[var(--surface-muted)] opacity-30"></div>
         </div>
       ) : data.length ? (
         <div className="h-[250px] rounded-xl border border-[var(--border)] bg-[var(--surface-strong)] p-2">
@@ -232,8 +237,8 @@ const ExpensePieCard = ({ data, loading, users, selectedUserId, onUserChange, ca
       </div>
 
       {loading ? (
-        <div className="h-[250px] rounded-xl border border-[var(--border)] bg-[var(--surface-strong)] p-4 text-sm">
-          Loading pie chart...
+        <div className="h-[250px] rounded-xl border border-[var(--border)] bg-[var(--surface-strong)] p-2 animate-pulse flex items-center justify-center">
+          <div className="h-40 w-40 rounded-full border-[16px] border-[var(--surface-muted)] opacity-30"></div>
         </div>
       ) : data.length ? (
         <div className="h-[250px] rounded-xl border border-[var(--border)] bg-[var(--surface-strong)] p-2">
