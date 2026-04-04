@@ -29,7 +29,6 @@ This README is intentionally written as an engineering handoff document.
 Roles used in system:
 - `Admin`
 - `Analyst`
-- `Viewer`
 - `User`
 
 Authorization is enforced at:
@@ -41,15 +40,16 @@ Authorization is enforced at:
 ### Why soft delete + hard delete split exists
 - Admin deletion is **hard delete** to support true administrative cleanup.
 - Normal `User` deletion is **soft delete** (`is_deleted`, `deleted_at`) to preserve accountability and accidental-delete recovery window.
-- `Analyst` and `Viewer` cannot mutate data.
+- `Analyst` is strictly read-only and cannot mutate data.
 
 ### Data visibility logic
 - `User` sees only own records.
-- `Admin`, `Analyst`, `Viewer` can view full record set.
+- `Admin` and `Analyst` can view full record set.
 - Audit logs are admin-only to avoid exposing sensitive activity history.
 
 ### Dashboard aggregation thinking
 - Summary is per type: `Income`, `Expense`, `Investment`.
+- Supports multi-tenant aggregation (Admin/Analyst can filter queries by `user_id` independently for each chart).
 - Supports ranges (`1h`, `1d`, `1w`, `1m`, `1y`, `5y`, `all`).
 - Bucket strategy adapts by range:
   - hourly buckets for short windows (`1h`, `1d`)
@@ -61,8 +61,8 @@ Authorization is enforced at:
 ### Backend functionality
 
 #### Auth + users
-- `POST /api/auth/register/`: public registration (restricted to `User`/`Viewer`).
-- `POST /api/auth/login/`: JWT login + refresh cookie.
+- `POST /api/auth/register/`: public registration (restricted to `User` role; hard-coded password complexity).
+- `POST /api/auth/login/`: JWT login + refresh cookie. Explicitly returns `401 Unauthorized` delineating "User does not exist" vs "Invalid password."
 - `POST /api/auth/logout/`: refresh cookie clear.
 - `GET /api/auth/me/`: current user profile.
 - `/api/auth/users/`: admin-only user management endpoints.
@@ -81,12 +81,14 @@ Authorization is enforced at:
 - Public pages: landing, login, register, contact, 404, unauthorized.
 - Protected app shell with sidebar + header.
 - Role-aware route guards via `ProtectedRoute`.
+- Embedded `/api-docs` Swagger UI directly in the frontend accessible without login.
 - User Management pages (`/users`, `/users/new`, `/users/:id`) for admins.
 - Records pages (`/records`, `/records/new`, `/records/:id`) with record ownership-aware actions.
 - Dashboard with:
   - stock-style trend charts (Income/Expense/Investment)
   - expense category pie chart
   - range toggles (`1D`, `1H`, `1W`, `1M`, `1Y`, `5Y`)
+  - independent Admin/Analyst visibility filters allowing charts to show specific user data
 
 ## 4. Database and Data Modeling
 
@@ -210,7 +212,7 @@ Base URL: `http://127.0.0.1:8000`
 - `GET /api/records/logs/` and `GET /api/records/logs/{id}/` (admin-only)
 
 #### Dashboard
-- `GET /api/dashboard/summary/?income_range=1d&expense_range=1d&investment_range=1d`
+- `GET /api/dashboard/summary/?income_range=1d&income_user_id=X&expense_range=1d&investment_range=1d`
 
 ### API documentation endpoints
 - Swagger UI: `/api/docs/`
