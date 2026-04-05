@@ -27,9 +27,9 @@ This README is intentionally written as an engineering handoff document.
 
 ### Authorization model (RBAC)
 Roles used in system:
-- `Admin`
-- `Analyst`
-- `User`
+- `Admin` [mail: admin@fin.processor, password: Admin@123]
+- `Analyst` [mail: analst@fin.processor, password: Analyst@123]
+- `User` [mail: user1@mail.com & user2@mail.com, password: User1@123 & User2@123]
 
 Authorization is enforced at:
 - Route-level permissions (`permission_classes`).
