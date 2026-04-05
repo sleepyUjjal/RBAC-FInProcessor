@@ -223,7 +223,7 @@ Postman tip:
 
 ### Assumptions made
 - MySQL is the primary DB backend.
-- Role strings are case-sensitive in backend (`Admin`, `Analyst`, `Viewer`, `User`).
+- Role strings are case-sensitive in backend (`Admin`, `Analyst`, `User`).
 - Frontend normalizes role to lowercase for UI route checks.
 - Local development uses Vite proxy (`/api` -> Django).
 
